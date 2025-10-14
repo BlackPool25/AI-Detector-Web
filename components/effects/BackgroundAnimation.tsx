@@ -32,10 +32,14 @@ export function BackgroundAnimation() {
       speedY: number
       opacity: number
       color: string
+      canvasWidth: number
+      canvasHeight: number
 
-      constructor(mode: DetectionMode) {
-        this.x = Math.random() * canvas.width
-        this.y = Math.random() * canvas.height
+      constructor(mode: DetectionMode, width: number, height: number) {
+        this.canvasWidth = width
+        this.canvasHeight = height
+        this.x = Math.random() * width
+        this.y = Math.random() * height
         this.size = Math.random() * 3 + 1
         this.speedX = Math.random() * 2 - 1
         this.speedY = Math.random() * 2 - 1
@@ -57,8 +61,8 @@ export function BackgroundAnimation() {
         this.y += this.speedY
 
         // Bounce off edges
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1
+        if (this.x < 0 || this.x > this.canvasWidth) this.speedX *= -1
+        if (this.y < 0 || this.y > this.canvasHeight) this.speedY *= -1
       }
 
       draw(ctx: CanvasRenderingContext2D) {
@@ -79,7 +83,7 @@ export function BackgroundAnimation() {
       const count = mode === 'text' ? 100 : mode === 'image' ? 80 : 60
       particles = []
       for (let i = 0; i < count; i++) {
-        particles.push(new Particle(mode))
+        particles.push(new Particle(mode, canvas.width, canvas.height))
       }
     }
 
