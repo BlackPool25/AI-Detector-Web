@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --ring: 199 89% 48%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --primary: 187 92% 42%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --ring: 187 92% 42%;
+  }
+}
+
+/* Text Mode - Light */
+[data-mode="text"]:not(.dark) {
+  --background: 199 100% 97%;
+  --primary: 199 89% 48%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 199 95% 74%;
+  --foreground: 222.2 84% 4.9%;
+}
+
+/* Text Mode - Dark */
+[data-mode="text"].dark {
+  --background: 222 47% 11%;
+  --primary: 187 92% 42%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --accent: 186 94% 67%;
+  --foreground: 210 40% 98%;
+}
+
+/* Image Mode - Light */
+[data-mode="image"]:not(.dark) {
+  --background: 300 100% 99%;
+  --primary: 330 81% 60%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 330 85% 70%;
+  --foreground: 290 85% 20%;
+}
+
+/* Image Mode - Dark */
+[data-mode="image"].dark {
+  --background: 260 24% 14%;
+  --primary: 292 76% 58%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 291 78% 49%;
+  --foreground: 300 50% 99%;
+}
+
+/* Video Mode - Light */
+[data-mode="video"]:not(.dark) {
+  --background: 27 100% 97%;
+  --primary: 25 95% 53%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 27 96% 61%;
+  --foreground: 20 90% 15%;
+}
+
+/* Video Mode - Dark */
+[data-mode="video"].dark {
+  --background: 12 10% 11%;
+  --primary: 0 84% 60%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 0 86% 70%;
+  --foreground: 0 86% 97%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    transition: background-color 1.2s ease, color 1.2s ease;
+    overflow-x: hidden;
+  }
+  
+  html {
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-modal {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+  }
+
+  .glass-modal-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Custom animations */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

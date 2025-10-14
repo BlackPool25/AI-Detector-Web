@@ -1,0 +1,45 @@
+{
+  "name": "ai-website",
+  "version": "1.0.0",
+  "description": "AI Detection Hub - Detect AI-generated text, images, and videos",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [
+    "ai",
+    "detection",
+    "nextjs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@react-spring/web": "latest",
+    "@studio-freight/lenis": "^1.0.42",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "autoprefixer": "latest",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "framer-motion": "latest",
+    "gsap": "latest",
+    "lenis": "latest",
+    "lucide-react": "latest",
+    "next": "latest",
+    "next-themes": "latest",
+    "postcss": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-spring": "latest",
+    "tailwind-merge": "latest",
+    "typescript": "latest"
+  },
+  "devDependencies": {
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "tailwindcss": "^3.4.18"
+  }
+}
