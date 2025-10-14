@@ -186,85 +186,98 @@ export function HowItWorks() {
             })}
           </div>
 
-          {/* Process flow */}
+          {/* Vertical Detection Pipeline */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-16 glass dark:glass-dark rounded-3xl p-8 md:p-12 relative overflow-hidden"
+            transition={{ duration: 0.8 }}
+            className="mt-20 max-w-4xl mx-auto"
           >
-            {/* Animated background */}
-            <motion.div
-              className="absolute inset-0 opacity-5"
-              style={{
-                background: 'radial-gradient(circle at 50% 50%, hsl(var(--primary)), transparent 70%)',
-              }}
-              animate={{
-                scale: [1, 1.2, 1],
-                rotate: [0, 180, 360],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                ease: 'linear',
-              }}
-            />
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              {[
-                { 
-                  icon: Zap, 
-                  step: 1, 
-                  title: 'Upload Content', 
-                  description: 'Upload your file for analysis',
-                  color: '#38BDF8'
-                },
-                { 
-                  icon: Brain, 
-                  step: 2, 
-                  title: 'AI Analysis', 
-                  description: 'Our models process the content',
-                  color: '#F472B6'
-                },
-                { 
-                  icon: Shield, 
-                  step: 3, 
-                  title: 'Get Results', 
-                  description: 'Receive confidence score',
-                  color: '#FB923C'
-                },
-              ].map((item, index) => {
-                const StepIcon = item.icon
-                return (
-                  <React.Fragment key={item.step}>
-                    <motion.div 
-                      className="flex-1 text-center space-y-4"
-                      initial={{ opacity: 0, scale: 0.5 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
+            <motion.h3 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-4xl md:text-5xl font-bold text-center mb-16"
+            >
+              Detection Pipeline
+            </motion.h3>
+
+            <div className="relative">
+              {/* Vertical connecting line - aligned with step number badges */}
+              <motion.div
+                className="absolute left-[30px] md:left-[46px] top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-accent to-primary opacity-20"
+                initial={{ scaleY: 0 }}
+                whileInView={{ scaleY: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+                style={{ transformOrigin: 'top' }}
+              />
+
+              <div className="space-y-12">
+                {[
+                  { 
+                    icon: Zap, 
+                    step: 1, 
+                    title: 'Upload Content', 
+                    description: 'Select your text, image, or video file. Our system accepts multiple formats and processes them securely.',
+                    color: '#38BDF8',
+                    details: ['Drag & drop support', 'Multiple file formats', 'Encrypted upload']
+                  },
+                  { 
+                    icon: Brain, 
+                    step: 2, 
+                    title: 'AI Analysis', 
+                    description: 'Advanced neural networks analyze patterns, artifacts, and statistical signatures unique to AI-generated content.',
+                    color: '#F472B6',
+                    details: ['Deep learning models', 'Pattern recognition', 'Real-time processing']
+                  },
+                  { 
+                    icon: Activity,
+                    step: 3,
+                    title: 'Feature Extraction',
+                    description: 'Extract key features and fingerprints that distinguish AI-generated content from human-created content.',
+                    color: '#FB923C',
+                    details: ['Frequency analysis', 'Metadata inspection', 'Statistical testing']
+                  },
+                  { 
+                    icon: Shield, 
+                    step: 4, 
+                    title: 'Get Results', 
+                    description: 'Receive a detailed confidence score with explanations, heatmaps, and supporting evidence for the detection.',
+                    color: '#34D399',
+                    details: ['Confidence score', 'Visual heatmaps', 'Detailed report']
+                  },
+                ].map((item, index) => {
+                  const StepIcon = item.icon
+                  return (
+                    <motion.div
+                      key={item.step}
+                      initial={{ opacity: 0, x: -100 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: '-50px' }}
                       transition={{
-                        duration: 0.5,
-                        delay: 0.8 + index * 0.2,
-                        type: 'spring',
-                        stiffness: 200,
+                        duration: 0.8,
+                        delay: index * 0.2,
+                        ease: [0.25, 0.46, 0.45, 0.94],
                       }}
+                      className="relative flex items-start gap-6 md:gap-12"
                     >
-                      <motion.div 
-                        className="relative w-20 h-20 mx-auto"
-                        whileHover={{ scale: 1.1, rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        <div 
-                          className="w-full h-full rounded-2xl flex items-center justify-center relative"
+                      {/* Step indicator */}
+                      <div className="relative flex-shrink-0">
+                        <motion.div
+                          className="relative w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center"
                           style={{ background: `${item.color}20` }}
+                          whileHover={{ scale: 1.1, rotate: 360 }}
+                          transition={{ duration: 0.6 }}
                         >
+                          {/* Pulsing ring */}
                           <motion.div
-                            className="absolute inset-0 rounded-2xl"
+                            className="absolute inset-0 rounded-full"
                             style={{ background: item.color }}
                             animate={{
-                              scale: [1, 1.5, 1],
-                              opacity: [0.3, 0, 0.3],
+                              scale: [1, 1.4, 1],
+                              opacity: [0.4, 0, 0.4],
                             }}
                             transition={{
                               duration: 2,
@@ -273,46 +286,77 @@ export function HowItWorks() {
                               delay: index * 0.3,
                             }}
                           />
-                          <StepIcon className="w-10 h-10 relative z-10" style={{ color: item.color }} />
-                        </div>
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 1 + index * 0.2 }}
-                      >
-                        <h3 className="text-xl font-bold">{item.title}</h3>
-                        <p className="text-sm text-foreground/60">
-                          {item.description}
-                        </p>
-                      </motion.div>
-                    </motion.div>
+                          
+                          <StepIcon 
+                            className="w-8 h-8 md:w-12 md:h-12 relative z-10" 
+                            style={{ color: item.color }} 
+                          />
+                        </motion.div>
 
-                    {index < 2 && (
-                      <motion.div 
-                        className="hidden md:block"
-                        initial={{ scaleX: 0 }}
-                        whileInView={{ scaleX: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: 1.2 + index * 0.3 }}
-                      >
+                        {/* Step number badge */}
                         <motion.div
-                          animate={{ x: [0, 10, 0] }}
+                          className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+                          style={{ 
+                            background: item.color,
+                            color: 'white'
+                          }}
+                          initial={{ scale: 0 }}
+                          whileInView={{ scale: 1 }}
+                          viewport={{ once: true }}
                           transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                            ease: 'easeInOut',
+                            type: 'spring',
+                            stiffness: 300,
+                            delay: index * 0.2 + 0.3,
                           }}
                         >
-                          <Sparkles className="w-6 h-6 text-primary" />
+                          {item.step}
                         </motion.div>
+                      </div>
+
+                      {/* Content */}
+                      <motion.div
+                        className="flex-1 pb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
+                      >
+                        <div className="glass dark:glass-dark rounded-2xl p-6 md:p-8 border-l-4 hover:shadow-xl transition-all duration-500" style={{ borderLeftColor: item.color }}>
+                          <h4 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: item.color }}>
+                            {item.title}
+                          </h4>
+                          <p className="text-foreground/70 mb-4 leading-relaxed">
+                            {item.description}
+                          </p>
+                          
+                          {/* Detail pills */}
+                          <div className="flex flex-wrap gap-2">
+                            {item.details.map((detail, detailIndex) => (
+                              <motion.span
+                                key={detail}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{
+                                  duration: 0.3,
+                                  delay: index * 0.2 + detailIndex * 0.1 + 0.4,
+                                }}
+                                className="px-3 py-1 rounded-full text-sm font-medium"
+                                style={{
+                                  background: `${item.color}15`,
+                                  color: item.color,
+                                }}
+                              >
+                                {detail}
+                              </motion.span>
+                            ))}
+                          </div>
+                        </div>
                       </motion.div>
-                    )}
-                  </React.Fragment>
-                )
-              })}
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           </motion.div>
         </motion.div>

@@ -1,102 +1,52 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Database, Download, ExternalLink, FileText, Image, Video, Filter } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
+import { Database, FileText, Image, Video, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { DatasetCard } from '@/components/data/DatasetCard'
 import { fadeInUp, staggerContainer } from '@/lib/animationVariants'
-import { cn } from '@/lib/utils'
 
-type DatasetType = 'all' | 'text' | 'image' | 'video'
+type DatasetType = 'all' | 'Text' | 'Image' | 'Video'
 
-const datasets = [
-  {
-    name: 'GPT-Detection Corpus',
-    type: 'text',
-    size: '2.4 GB',
-    samples: '1.2M',
-    description: 'Large-scale dataset of human and GPT-generated text across multiple domains',
-    sources: ['GPT-4', 'GPT-3.5', 'Human'],
-    license: 'MIT',
-    github: 'https://github.com',
-    paper: 'https://arxiv.org',
-  },
-  {
-    name: 'LAION AI-Art Dataset',
-    type: 'image',
-    size: '450 GB',
-    samples: '10M',
-    description: 'AI-generated images from Stable Diffusion, Midjourney, and DALL-E',
-    sources: ['Stable Diffusion', 'Midjourney', 'DALL-E 2'],
-    license: 'Creative Commons',
-    github: 'https://github.com',
-    paper: 'https://arxiv.org',
-  },
-  {
-    name: 'FaceForensics++',
-    type: 'video',
-    size: '38 GB',
-    samples: '5K videos',
-    description: 'Comprehensive deepfake detection dataset with multiple manipulation methods',
-    sources: ['FaceSwap', 'Face2Face', 'NeuralTextures'],
-    license: 'Academic',
-    github: 'https://github.com',
-    paper: 'https://arxiv.org',
-  },
-  {
-    name: 'Synthetic Text Benchmark',
-    type: 'text',
-    size: '890 MB',
-    samples: '500K',
-    description: 'Curated benchmark for testing text detection models',
-    sources: ['Multiple LLMs', 'Human Writers'],
-    license: 'Apache 2.0',
-    github: 'https://github.com',
-    paper: 'https://arxiv.org',
-  },
-  {
-    name: 'AI Image Forensics',
-    type: 'image',
-    size: '125 GB',
-    samples: '3M',
-    description: 'Mixed real and AI-generated images with detailed metadata',
-    sources: ['GANs', 'Diffusion Models', 'Real Photos'],
-    license: 'MIT',
-    github: 'https://github.com',
-    paper: 'https://arxiv.org',
-  },
-  {
-    name: 'Deepfake Detection Challenge',
-    type: 'video',
-    size: '470 GB',
-    samples: '100K videos',
-    description: 'Facebook/Meta deepfake detection challenge dataset',
-    sources: ['Various Deepfake Methods'],
-    license: 'Custom',
-    github: 'https://github.com',
-    paper: 'https://arxiv.org',
-  },
-]
-
-const typeIcons = {
-  text: FileText,
-  image: Image,
-  video: Video,
+interface Dataset {
+  id: string
+  title: string
+  description: string
+  url: string
+  category: string
+  size: string
+  year: string
+  downloads: string
 }
 
-const typeColors = {
-  text: '#38BDF8',
-  image: '#F472B6',
-  video: '#FB923C',
+const typeIcons = {
+  Text: FileText,
+  Image: Image,
+  Video: Video,
 }
 
 export default function DatasetsPage() {
   const [filter, setFilter] = useState<DatasetType>('all')
+  const [datasets, setDatasets] = useState<Dataset[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/data/datasets/datasets.json')
+      .then(res => res.json())
+      .then(data => {
+        setDatasets(data)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error('Error loading datasets:', error)
+        setLoading(false)
+      })
+  }, [])
 
   const filteredDatasets = filter === 'all' 
     ? datasets 
-    : datasets.filter(d => d.type === filter)
+    : datasets.filter(d => d.category === filter)
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4">
@@ -125,7 +75,7 @@ export default function DatasetsPage() {
           variants={fadeInUp}
           className="flex flex-wrap justify-center gap-3"
         >
-          {(['all', 'text', 'image', 'video'] as DatasetType[]).map((type) => {
+          {(['all', 'Text', 'Image', 'Video'] as DatasetType[]).map((type) => {
             const Icon = type === 'all' ? Filter : typeIcons[type as keyof typeof typeIcons]
             return (
               <Button
@@ -141,98 +91,40 @@ export default function DatasetsPage() {
           })}
         </motion.div>
 
-        {/* Dataset Grid */}
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: '-100px' }}
-          variants={staggerContainer}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {filteredDatasets.map((dataset, index) => {
-            const Icon = typeIcons[dataset.type as keyof typeof typeIcons]
-            const color = typeColors[dataset.type as keyof typeof typeColors]
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-20">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              className="inline-block"
+            >
+              <Database className="w-12 h-12 text-primary" />
+            </motion.div>
+            <p className="mt-4 text-foreground/60">Loading datasets...</p>
+          </div>
+        )}
 
-            return (
-              <motion.div
-                key={dataset.name}
-                variants={fadeInUp}
-                custom={index}
-                whileHover={{ y: -5 }}
-                className="h-full"
-              >
-                <Card className="h-full glass dark:glass-dark border-foreground/10 hover:shadow-2xl transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className="p-3 rounded-xl"
-                        style={{ background: `${color}20` }}
-                      >
-                        <Icon className="w-6 h-6" style={{ color }} />
-                      </div>
-                      <div
-                        className="px-3 py-1 rounded-full text-xs font-semibold"
-                        style={{ 
-                          background: `${color}20`,
-                          color 
-                        }}
-                      >
-                        {dataset.type}
-                      </div>
-                    </div>
-                    <CardTitle className="text-xl">{dataset.name}</CardTitle>
-                    <CardDescription>{dataset.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Stats */}
-                    <div className="flex gap-4 text-sm">
-                      <div>
-                        <div className="text-foreground/60">Size</div>
-                        <div className="font-semibold">{dataset.size}</div>
-                      </div>
-                      <div>
-                        <div className="text-foreground/60">Samples</div>
-                        <div className="font-semibold">{dataset.samples}</div>
-                      </div>
-                    </div>
+        {/* Dataset Grid with Tiling Animation */}
+        {!loading && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDatasets.map((dataset, index) => (
+              <DatasetCard key={dataset.id} dataset={dataset} index={index} />
+            ))}
+          </div>
+        )}
 
-                    {/* Sources */}
-                    <div>
-                      <div className="text-sm text-foreground/60 mb-2">Sources</div>
-                      <div className="flex flex-wrap gap-2">
-                        {dataset.sources.map((source) => (
-                          <span
-                            key={source}
-                            className="px-2 py-1 rounded-lg bg-foreground/5 text-xs"
-                          >
-                            {source}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* License */}
-                    <div className="text-sm">
-                      <span className="text-foreground/60">License: </span>
-                      <span className="font-medium">{dataset.license}</span>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 pt-4">
-                      <Button variant="default" size="sm" className="flex-1">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )
-          })}
-        </motion.div>
+        {/* Empty State */}
+        {!loading && filteredDatasets.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <Database className="w-16 h-16 text-foreground/20 mx-auto mb-4" />
+            <p className="text-foreground/60">No datasets found for this category.</p>
+          </motion.div>
+        )}
       </div>
     </div>
   )

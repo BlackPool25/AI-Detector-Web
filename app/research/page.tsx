@@ -1,114 +1,47 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, Image, Video, ExternalLink, Copy, Check } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
+import { FileText, Image, Video, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { PaperCard } from '@/components/data/PaperCard'
 import { fadeInUp, staggerContainer } from '@/lib/animationVariants'
-import { cn } from '@/lib/utils'
 
-type PaperType = 'text' | 'image' | 'video'
+type PaperType = 'all' | 'Image Detection' | 'Video Detection' | 'Text Detection' | 'Survey' | 'Blockchain & Security'
 
-const papers = [
-  {
-    title: 'DetectGPT: Zero-Shot Machine-Generated Text Detection',
-    authors: 'Mitchell et al.',
-    venue: 'NeurIPS 2023',
-    date: '2023',
-    type: 'text',
-    abstract: 'We propose DetectGPT, a novel zero-shot method for detecting machine-generated text...',
-    tags: ['GPT-4', 'Zero-Shot', 'Perplexity'],
-    pdf: 'https://arxiv.org',
-    arxiv: 'https://arxiv.org',
-    code: 'https://github.com',
-  },
-  {
-    title: 'Detecting AI-Generated Images with Frequency Analysis',
-    authors: 'Zhang et al.',
-    venue: 'CVPR 2024',
-    date: '2024',
-    type: 'image',
-    abstract: 'A frequency-domain approach to identifying synthetic images from diffusion models...',
-    tags: ['Frequency Analysis', 'CNNs', 'Diffusion Models'],
-    pdf: 'https://arxiv.org',
-    arxiv: 'https://arxiv.org',
-    code: 'https://github.com',
-  },
-  {
-    title: 'Deepfake Detection Through Temporal Inconsistency',
-    authors: 'Kumar et al.',
-    venue: 'ICCV 2023',
-    date: '2023',
-    type: 'video',
-    abstract: 'Leveraging temporal inconsistencies in facial movements for deepfake video detection...',
-    tags: ['Temporal Analysis', 'Face Manipulation', 'Deep Learning'],
-    pdf: 'https://arxiv.org',
-    arxiv: 'https://arxiv.org',
-    code: 'https://github.com',
-  },
-  {
-    title: 'Large Language Model Watermarking via Statistical Signatures',
-    authors: 'Li et al.',
-    venue: 'ACL 2024',
-    date: '2024',
-    type: 'text',
-    abstract: 'A watermarking technique for LLM-generated text using statistical signatures...',
-    tags: ['Watermarking', 'LLMs', 'Statistical Analysis'],
-    pdf: 'https://arxiv.org',
-    arxiv: 'https://arxiv.org',
-    code: 'https://github.com',
-  },
-  {
-    title: 'GAN Fingerprints: Forensic Analysis of Generated Images',
-    authors: 'Wang et al.',
-    venue: 'SIGGRAPH 2023',
-    date: '2023',
-    type: 'image',
-    abstract: 'Identifying unique fingerprints left by different GAN architectures...',
-    tags: ['GANs', 'Forensics', 'Image Analysis'],
-    pdf: 'https://arxiv.org',
-    arxiv: 'https://arxiv.org',
-    code: 'https://github.com',
-  },
-  {
-    title: 'Audio-Visual Synchronization for Deepfake Detection',
-    authors: 'Chen et al.',
-    venue: 'ICASSP 2024',
-    date: '2024',
-    type: 'video',
-    abstract: 'Detecting deepfakes by analyzing audio-visual synchronization patterns...',
-    tags: ['Audio-Visual', 'Multimodal', 'Synchronization'],
-    pdf: 'https://arxiv.org',
-    arxiv: 'https://arxiv.org',
-    code: 'https://github.com',
-  },
-]
-
-const typeIcons = {
-  text: FileText,
-  image: Image,
-  video: Video,
-}
-
-const typeColors = {
-  text: '#38BDF8',
-  image: '#F472B6',
-  video: '#FB923C',
+interface Paper {
+  id: string
+  title: string
+  authors: string
+  journal: string
+  year: string
+  url: string
+  abstract: string
+  citations: string
+  category: string
 }
 
 export default function ResearchPage() {
-  const [activeTab, setActiveTab] = useState<PaperType>('text')
-  const [copiedPaper, setCopiedPaper] = useState<string | null>(null)
+  const [filter, setFilter] = useState<PaperType>('all')
+  const [papers, setPapers] = useState<Paper[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredPapers = papers.filter((p) => p.type === activeTab)
+  useEffect(() => {
+    fetch('/data/papers/papers.json')
+      .then(res => res.json())
+      .then(data => {
+        setPapers(data)
+        setLoading(false)
+      })
+      .catch(error => {
+        console.error('Error loading papers:', error)
+        setLoading(false)
+      })
+  }, [])
 
-  const handleCiteCopy = (paperTitle: string) => {
-    // Mock citation copy
-    navigator.clipboard.writeText(`@inproceedings{${paperTitle},\n  title={${paperTitle}},\n  author={...},\n  year={2023}\n}`)
-    setCopiedPaper(paperTitle)
-    setTimeout(() => setCopiedPaper(null), 2000)
-  }
+  const filteredPapers = filter === 'all'
+    ? papers
+    : papers.filter(p => p.category === filter)
 
   return (
     <div className="min-h-screen pt-24 pb-20 px-4">
@@ -131,132 +64,59 @@ export default function ResearchPage() {
           </motion.p>
         </motion.div>
 
-        {/* Tabs */}
+        {/* Filters */}
         <motion.div
           initial="initial"
           animate="animate"
           variants={fadeInUp}
-          className="flex justify-center gap-3"
+          className="flex flex-wrap justify-center gap-3"
         >
-          {(['text', 'image', 'video'] as PaperType[]).map((type) => {
-            const Icon = typeIcons[type]
-            const color = typeColors[type]
-            const isActive = activeTab === type
-
-            return (
-              <Button
-                key={type}
-                variant={isActive ? 'default' : 'ghost'}
-                onClick={() => setActiveTab(type)}
-                className="capitalize"
-                style={
-                  isActive
-                    ? {
-                        background: `${color}20`,
-                        color: color,
-                        borderColor: color,
-                      }
-                    : undefined
-                }
-              >
-                <Icon className="w-4 h-4 mr-2" />
-                {type}
-              </Button>
-            )
-          })}
+          {(['all', 'Image Detection', 'Video Detection', 'Text Detection', 'Survey'] as PaperType[]).map((type) => (
+            <Button
+              key={type}
+              variant={filter === type ? 'default' : 'ghost'}
+              onClick={() => setFilter(type)}
+              className="text-sm"
+            >
+              {type}
+            </Button>
+          ))}
         </motion.div>
 
-        {/* Papers Grid */}
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: '-100px' }}
-          variants={staggerContainer}
-          className="space-y-6"
-        >
-          {filteredPapers.map((paper, index) => {
-            const Icon = typeIcons[paper.type]
-            const color = typeColors[paper.type]
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-20">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              className="inline-block"
+            >
+              <BookOpen className="w-12 h-12 text-primary" />
+            </motion.div>
+            <p className="mt-4 text-foreground/60">Loading research papers...</p>
+          </div>
+        )}
 
-            return (
-              <motion.div key={paper.title} variants={fadeInUp} custom={index}>
-                <Card className="glass dark:glass-dark border-foreground/10 hover:shadow-2xl transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="p-3 rounded-xl flex-shrink-0"
-                        style={{ background: `${color}20` }}
-                      >
-                        <Icon className="w-6 h-6" style={{ color }} />
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <CardTitle className="text-xl">{paper.title}</CardTitle>
-                        <div className="flex flex-wrap gap-2 text-sm text-foreground/70">
-                          <span>{paper.authors}</span>
-                          <span>•</span>
-                          <span className="text-primary">{paper.venue}</span>
-                          <span>•</span>
-                          <span>{paper.date}</span>
-                        </div>
-                        <CardDescription className="text-base">
-                          {paper.abstract}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2">
-                      {paper.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-3 py-1 rounded-full text-xs font-medium"
-                          style={{
-                            background: `${color}15`,
-                            color: color,
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+        {/* Papers Grid with Tiling Animation */}
+        {!loading && (
+          <div className="grid md:grid-cols-2 gap-6">
+            {filteredPapers.map((paper, index) => (
+              <PaperCard key={paper.id} paper={paper} index={index} />
+            ))}
+          </div>
+        )}
 
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-3">
-                      <Button variant="default" size="sm">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        PDF
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        arXiv
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        Code
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCiteCopy(paper.title)}
-                      >
-                        {copiedPaper === paper.title ? (
-                          <>
-                            <Check className="w-4 h-4 mr-2" />
-                            Copied!
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4 mr-2" />
-                            Cite
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )
-          })}
-        </motion.div>
+        {/* Empty State */}
+        {!loading && filteredPapers.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <BookOpen className="w-16 h-16 text-foreground/20 mx-auto mb-4" />
+            <p className="text-foreground/60">No papers found for this category.</p>
+          </motion.div>
+        )}
 
         {/* Our Contributions */}
         <motion.section

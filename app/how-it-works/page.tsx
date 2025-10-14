@@ -3,7 +3,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Upload, Scan, Brain, CheckCircle, FileText, Image, Video } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { fadeInUp, staggerContainer } from '@/lib/animationVariants'
 
 const pipeline = [
@@ -115,51 +114,145 @@ export default function HowItWorksPage() {
           </motion.p>
         </motion.div>
 
-        {/* Pipeline */}
+        {/* Vertical Pipeline */}
         <motion.section
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, margin: '-100px' }}
           variants={staggerContainer}
-          className="space-y-8"
+          className="space-y-12"
         >
-          <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-center">
+          <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold text-center">
             Detection Pipeline
           </motion.h2>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            {pipeline.map((item, index) => {
-              const Icon = item.icon
+          <div className="relative max-w-5xl mx-auto">
+            {/* Vertical connecting line aligned with step badges */}
+            <motion.div
+              className="absolute left-[30px] md:left-[46px] top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-accent to-primary opacity-20"
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, ease: 'easeOut' }}
+              style={{ transformOrigin: 'top' }}
+            />
 
-              return (
-                <React.Fragment key={item.step}>
-                  <motion.div variants={fadeInUp} custom={index}>
-                    <Card className="h-full glass dark:glass-dark border-foreground/10 text-center hover:shadow-2xl transition-all duration-300">
-                      <CardContent className="pt-6 space-y-4">
-                        <div className="w-16 h-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
-                          <Icon className="w-8 h-8 text-primary" />
-                        </div>
-                        <div className="space-y-2">
-                          <div className="text-sm font-semibold text-primary">
-                            Step {item.step}
-                          </div>
-                          <h3 className="text-lg font-bold">{item.title}</h3>
-                          <p className="text-sm text-foreground/70">
+            <div className="space-y-16">
+              {pipeline.map((item, index) => {
+                const Icon = item.icon
+                const colors = [
+                  '#38BDF8', // Blue
+                  '#F472B6', // Pink
+                  '#FB923C', // Orange
+                  '#34D399', // Green
+                ]
+                const color = colors[index] || '#A78BFA'
+
+                return (
+                  <motion.div
+                    key={item.step}
+                    initial={{ opacity: 0, x: -100 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{
+                      duration: 0.8,
+                      delay: index * 0.2,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
+                    className="relative flex items-start gap-8 md:gap-16"
+                  >
+                    {/* Icon and Step Number */}
+                    <div className="relative flex-shrink-0">
+                      {/* Main Icon Circle */}
+                      <motion.div
+                        className="relative w-16 h-16 md:w-28 md:h-28 rounded-full flex items-center justify-center z-10"
+                        style={{ background: `${color}20` }}
+                        whileHover={{ scale: 1.1, rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        {/* Pulsing ring */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{ background: color }}
+                          animate={{
+                            scale: [1, 1.5, 1],
+                            opacity: [0.4, 0, 0.4],
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            delay: index * 0.3,
+                          }}
+                        />
+                        
+                        <Icon 
+                          className="w-8 h-8 md:w-14 md:h-14 relative z-10" 
+                          style={{ color }} 
+                        />
+                      </motion.div>
+
+                      {/* Step number badge */}
+                      <motion.div
+                        className="absolute -bottom-2 -right-2 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-base z-20"
+                        style={{ 
+                          background: color,
+                          color: 'white',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        }}
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 300,
+                          delay: index * 0.2 + 0.3,
+                        }}
+                      >
+                        {item.step}
+                      </motion.div>
+                    </div>
+
+                    {/* Content Card */}
+                    <motion.div
+                      className="flex-1 pb-8"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
+                    >
+                      <div 
+                        className="glass dark:glass-dark rounded-3xl p-6 md:p-10 border-l-4 hover:shadow-2xl transition-all duration-500 relative overflow-hidden"
+                        style={{ borderLeftColor: color }}
+                      >
+                        {/* Animated background gradient */}
+                        <motion.div
+                          className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: `radial-gradient(circle at top right, ${color}10, transparent 70%)`,
+                          }}
+                        />
+
+                        <div className="relative z-10">
+                          <h3 className="text-2xl md:text-4xl font-bold mb-4" style={{ color }}>
+                            {item.title}
+                          </h3>
+                          <p className="text-base md:text-lg text-foreground/70 leading-relaxed">
                             {item.description}
                           </p>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
 
-                  {index < pipeline.length - 1 && (
-                    <div className="hidden md:flex items-center justify-center">
-                      <div className="text-3xl text-primary">→</div>
-                    </div>
-                  )}
-                </React.Fragment>
-              )
-            })}
+                        {/* Decorative corner element */}
+                        <div
+                          className="absolute -bottom-4 -right-4 w-32 h-32 rounded-full opacity-10"
+                          style={{ background: color }}
+                        />
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </motion.section>
 
@@ -169,47 +262,108 @@ export default function HowItWorksPage() {
           whileInView="animate"
           viewport={{ once: true, margin: '-100px' }}
           variants={staggerContainer}
-          className="space-y-8"
+          className="space-y-12"
         >
-          <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-center">
+          <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold text-center">
             Detection Methods
           </motion.h2>
 
-          <div className="space-y-8">
+          <div className="space-y-12 max-w-6xl mx-auto">
             {methods.map((method, index) => {
               const Icon = method.icon
 
               return (
-                <motion.div key={method.type} variants={fadeInUp} custom={index}>
-                  <Card className="glass dark:glass-dark border-foreground/10 overflow-hidden">
+                <motion.div 
+                  key={method.type}
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{
+                    duration: 0.8,
+                    delay: index * 0.2,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
+                >
+                  <div className="glass dark:glass-dark rounded-3xl p-8 md:p-12 border-l-4 hover:shadow-2xl transition-all duration-500 relative overflow-hidden group"
+                    style={{ borderLeftColor: method.color }}
+                  >
+                    {/* Animated background gradient */}
+                    <motion.div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: `linear-gradient(135deg, ${method.color}08, transparent 60%)`,
+                      }}
+                    />
+
+                    {/* Header */}
+                    <div className="flex items-center gap-6 mb-8 relative z-10">
+                      <motion.div
+                        className="relative w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center"
+                        style={{ background: `${method.color}20` }}
+                        whileHover={{ scale: 1.1, rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        {/* Pulsing background */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{ background: method.color }}
+                          animate={{
+                            scale: [1, 1.3, 1],
+                            opacity: [0.3, 0, 0.3],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            delay: index * 0.3,
+                          }}
+                        />
+                        <Icon className="w-10 h-10 md:w-12 md:h-12 relative z-10" style={{ color: method.color }} />
+                      </motion.div>
+                      
+                      <h3 className="text-3xl md:text-4xl font-bold" style={{ color: method.color }}>
+                        {method.type}
+                      </h3>
+                    </div>
+
+                    {/* Features Grid */}
+                    <div className="grid md:grid-cols-3 gap-6 md:gap-8 relative z-10">
+                      {method.features.map((feature, featureIndex) => (
+                        <motion.div 
+                          key={feature.title}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{
+                            duration: 0.5,
+                            delay: index * 0.2 + featureIndex * 0.1,
+                          }}
+                          className="space-y-3 group/feature"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div 
+                              className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
+                              style={{ background: method.color }}
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-bold text-lg mb-2 group-hover/feature:text-primary transition-colors">
+                                {feature.title}
+                              </h4>
+                              <p className="text-sm md:text-base text-foreground/70 leading-relaxed">
+                                {feature.description}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Decorative corner blob */}
                     <div
-                      className="h-2"
+                      className="absolute -bottom-12 -right-12 w-48 h-48 rounded-full opacity-5 group-hover:opacity-10 transition-opacity duration-500"
                       style={{ background: method.color }}
                     />
-                    <CardHeader>
-                      <div className="flex items-center gap-4">
-                        <div
-                          className="p-3 rounded-xl"
-                          style={{ background: `${method.color}20` }}
-                        >
-                          <Icon className="w-7 h-7" style={{ color: method.color }} />
-                        </div>
-                        <CardTitle className="text-2xl">{method.type}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid md:grid-cols-3 gap-6">
-                        {method.features.map((feature) => (
-                          <div key={feature.title} className="space-y-2">
-                            <h4 className="font-semibold">{feature.title}</h4>
-                            <p className="text-sm text-foreground/70">
-                              {feature.description}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  </div>
                 </motion.div>
               )
             })}
