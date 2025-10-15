@@ -124,11 +124,11 @@ export default function SettingsPage() {
 
   if (showCreateProfile && user) {
     return (
-      <div className="min-h-screen pt-32 px-4 md:px-8 lg:px-16 flex items-center justify-center">
+      <div className="min-h-screen pt-28 md:pt-32 px-4 md:px-8 lg:px-16 flex items-center justify-center">
         <div className="max-w-md w-full">
-          <Card className="p-8">
-            <h2 className="text-2xl font-bold mb-2 text-center">Create Your Profile</h2>
-            <p className="text-foreground/60 mb-6 text-center">
+          <Card className="p-6 sm:p-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-center">Create Your Profile</h2>
+            <p className="text-sm sm:text-base text-foreground/60 mb-4 sm:mb-6 text-center">
               We need to create your profile to continue. Choose a username to get started.
             </p>
             
@@ -211,31 +211,31 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-16 px-4 md:px-8 lg:px-16">
+    <div className="min-h-screen pt-28 md:pt-32 pb-16 px-4 md:px-8 lg:px-16">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6 md:mb-8"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Account Settings
           </h1>
-          <p className="text-lg text-foreground/70">
+          <p className="text-base md:text-lg text-foreground/70">
             Manage your profile and account preferences
           </p>
         </motion.div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Avatar Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Card className="p-8">
-              <h2 className="text-xl font-semibold mb-6">Profile Photo</h2>
+            <Card className="p-4 sm:p-6 md:p-8">
+              <h2 className="text-lg md:text-xl font-semibold mb-4 md:mb-6">Profile Photo</h2>
               <AvatarUpload
                 currentAvatarUrl={profile.avatar_url}
                 onUpload={handleAvatarUpload}
@@ -251,7 +251,7 @@ export default function SettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="p-8">
+            <Card className="p-4 sm:p-6 md:p-8">
               <ProfileSection
                 username={profile.username}
                 bio={profile.bio}
@@ -267,7 +267,7 @@ export default function SettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="p-8">
+            <Card className="p-4 sm:p-6 md:p-8">
               <PasswordSection />
             </Card>
           </motion.div>
@@ -278,13 +278,15 @@ export default function SettingsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="p-8">
-              <h3 className="text-lg font-semibold mb-4">Account Information</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2 text-foreground/70">
-                  <Calendar className="w-4 h-4" />
-                  <span>Account created:</span>
-                  <span className="font-medium">
+            <Card className="p-4 sm:p-6 md:p-8">
+              <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Account Information</h3>
+              <div className="space-y-2 md:space-y-3 text-xs md:text-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-foreground/70">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Account created:</span>
+                  </div>
+                  <span className="font-medium sm:ml-auto">
                     {new Date(profile.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -292,10 +294,12 @@ export default function SettingsPage() {
                     })}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-foreground/70">
-                  <Clock className="w-4 h-4" />
-                  <span>Last updated:</span>
-                  <span className="font-medium">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-foreground/70">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Last updated:</span>
+                  </div>
+                  <span className="font-medium sm:ml-auto">
                     {new Date(profile.updated_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',

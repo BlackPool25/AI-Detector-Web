@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { UserProfile } from '@/types/profile'
 import { compressImage } from '@/lib/imageCompression'
@@ -9,15 +9,7 @@ export function useProfile(userId?: string) {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
-  useEffect(() => {
-    if (userId) {
-      fetchProfile(userId)
-    } else {
-      setLoading(false)
-    }
-  }, [userId])
-
-  const fetchProfile = async (id: string) => {
+  const fetchProfile = useCallback(async (id: string) => {
     try {
       setLoading(true)
       setError(null)
@@ -38,7 +30,15 @@ export function useProfile(userId?: string) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    if (userId) {
+      fetchProfile(userId)
+    } else {
+      setLoading(false)
+    }
+  }, [userId, fetchProfile])
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!userId) throw new Error('No user ID provided')

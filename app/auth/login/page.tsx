@@ -51,14 +51,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass dark:glass-dark rounded-2xl p-8">
-        <h1 className="text-3xl font-bold text-center mb-2">Login to DetectX</h1>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
+    <div className="min-h-screen flex items-center justify-center p-4 py-20 md:py-4">
+      <div className="w-full max-w-md glass dark:glass-dark rounded-2xl p-6 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2">Login to DetectX</h1>
+        <p className="text-center text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8">
           Access your AI detection history
         </p>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-4 sm:space-y-6">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg p-4 text-sm">
               {error}
@@ -97,19 +97,19 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full min-h-[48px]"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
             <Link 
               href="/auth/signup" 
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-blue-600 dark:text-blue-400 hover:underline font-medium inline-block min-h-[44px] flex items-center justify-center"
             >
               Sign up
             </Link>

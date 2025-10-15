@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -36,6 +36,22 @@ export function Navbar() {
   const router = useRouter()
   const supabase = createClient()
 
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) throw error
+      setProfile(data)
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+      setProfile(null)
+    }
+  }, [supabase])
+
   useEffect(() => {
     setMounted(true)
 
@@ -60,23 +76,7 @@ export function Navbar() {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase])
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) throw error
-      setProfile(data)
-    } catch (err) {
-      console.error('Error fetching profile:', err)
-      setProfile(null)
-    }
-  }
+  }, [supabase, fetchProfile])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -170,7 +170,7 @@ export function Navbar() {
             {/* Theme toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-3 rounded-lg hover:bg-white/10 transition-colors"
+              className="p-3 rounded-lg hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
@@ -191,10 +191,10 @@ export function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors min-h-[44px]"
                   >
                     {profile?.avatar_url ? (
-                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary">
+                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
                         <Image
                           src={profile.avatar_url}
                           alt="Profile"
@@ -204,7 +204,7 @@ export function Navbar() {
                         />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-700">
+                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-700 flex-shrink-0">
                         <Image
                           src="/default-avatar.svg"
                           alt="Default avatar"
@@ -227,14 +227,14 @@ export function Navbar() {
                       <Link
                         href="/settings"
                         onClick={() => setShowUserMenu(false)}
-                        className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors min-h-[44px]"
                       >
                         <Settings className="w-4 h-4" />
                         <span>Settings</span>
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors min-h-[44px]"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>
@@ -262,7 +262,7 @@ export function Navbar() {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-3 rounded-lg hover:bg-white/10 transition-colors"
+            className="lg:hidden p-3 rounded-lg hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
@@ -293,7 +293,7 @@ export function Navbar() {
               {/* Theme toggle for mobile */}
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-white/10 transition-all"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-white/10 transition-all min-h-[44px]"
                 aria-label="Toggle theme"
               >
                 <span>Theme</span>

@@ -32,11 +32,6 @@ export function PasswordSection() {
     setSuccess(false)
 
     try {
-      // Validate current password is provided
-      if (!formData.currentPassword) {
-        throw new Error('Please enter your current password')
-      }
-
       // Validate passwords match
       if (formData.newPassword !== formData.confirmPassword) {
         throw new Error('New passwords do not match')
@@ -47,33 +42,35 @@ export function PasswordSection() {
         throw new Error('New password must be at least 6 characters')
       }
 
-      // Validate new password is different from current
-      if (formData.currentPassword === formData.newPassword) {
+      // Validate new password is different from current (client-side check only)
+      if (formData.currentPassword && formData.currentPassword === formData.newPassword) {
         throw new Error('New password must be different from current password')
       }
 
-      // Get current user email
+      // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user?.email) {
-        throw new Error('User not found')
+        throw new Error('User not found. Please log in again.')
       }
 
-      // Verify current password by attempting to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      // Verify current password by re-authenticating
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: formData.currentPassword,
       })
 
-      if (signInError) {
+      if (verifyError) {
         throw new Error('Current password is incorrect')
       }
 
-      // Current password is correct, now update to new password
+      // Update to new password (session is already valid)
       const { error: updateError } = await supabase.auth.updateUser({
         password: formData.newPassword
       })
 
-      if (updateError) throw updateError
+      if (updateError) {
+        throw new Error(updateError.message || 'Failed to update password')
+      }
 
       // Success!
       setSuccess(true)

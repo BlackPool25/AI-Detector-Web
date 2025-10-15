@@ -62,17 +62,6 @@ export default function SignupPage() {
     }
 
     try {
-      // Check if username already exists
-      const { data: existingProfile } = await supabase
-        .from('user_profiles')
-        .select('username')
-        .eq('username', username.trim())
-        .single()
-
-      if (existingProfile) {
-        throw new Error('Username already taken. Please choose another.')
-      }
-
       // Create auth user
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -97,7 +86,11 @@ export default function SignupPage() {
 
         if (profileError) {
           console.error('Profile creation error:', profileError)
-          // Don't fail the signup if profile creation fails
+          // Check if it's a unique constraint violation
+          if (profileError.message?.includes('duplicate') || profileError.message?.includes('unique')) {
+            throw new Error('Username already taken. Please choose another.')
+          }
+          // Don't fail the signup if profile creation fails for other reasons
           // User can create it later or we can handle it in the callback
         }
 
@@ -117,20 +110,20 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md glass dark:glass-dark rounded-2xl p-8">
+      <div className="min-h-screen flex items-center justify-center p-4 py-20 md:py-4">
+        <div className="w-full max-w-md glass dark:glass-dark rounded-2xl p-6 sm:p-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold mb-2">Check Your Email</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Check Your Email</h2>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6">
               We've sent you a confirmation email. Please check your inbox and click the link to verify your account.
             </p>
             <Link href="/auth/login">
-              <Button className="w-full">
+              <Button className="w-full min-h-[48px]">
                 Go to Login
               </Button>
             </Link>
@@ -141,14 +134,14 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass dark:glass-dark rounded-2xl p-8">
-        <h1 className="text-3xl font-bold text-center mb-2">Create Account</h1>
-        <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
+    <div className="min-h-screen flex items-center justify-center p-4 py-20 md:py-4">
+      <div className="w-full max-w-md glass dark:glass-dark rounded-2xl p-6 sm:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2">Create Account</h1>
+        <p className="text-center text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8">
           Start detecting AI-generated content
         </p>
 
-        <form onSubmit={handleSignup} className="space-y-6">
+        <form onSubmit={handleSignup} className="space-y-4 sm:space-y-6">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg p-4 text-sm">
               {error}
@@ -225,14 +218,14 @@ export default function SignupPage() {
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full min-h-[48px]"
             disabled={loading}
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
             <Link 
