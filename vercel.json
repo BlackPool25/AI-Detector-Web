@@ -8,12 +8,6 @@
   "env": {},
   "build": {
     "env": {}
-  },
-  "crons": [
-    {
-      "path": "/api/cron/cleanup",
-      "schedule": "*/10 * * * *"
-    }
-  ]
+  }
 }
 
