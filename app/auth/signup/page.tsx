@@ -63,16 +63,21 @@ export default function SignupPage() {
 
     try {
       // Create auth user with username in metadata
+      // Ensure the redirect URL has the correct protocol
+      const redirectUrl = `${window.location.origin}/auth/callback`
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
           data: {
             username: username.trim(),
           }
         }
       })
+      
+      console.log('Signup redirect URL:', redirectUrl) // For debugging
 
       if (error) throw error
 

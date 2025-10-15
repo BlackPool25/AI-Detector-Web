@@ -15,22 +15,36 @@ Email confirmation links are redirecting to `localhost:3000` instead of your pro
 
 Set the **Site URL** to your production domain:
 ```
-https://your-app-name.vercel.app
+https://ai-detector-web-nu.vercel.app
 ```
-(Replace `your-app-name` with your actual Vercel deployment URL)
+
+**CRITICAL:** 
+- ✅ **MUST** include `https://` protocol
+- ✅ **MUST** be the exact domain (no trailing slash)
+- ❌ **WRONG:** `ai-detector-web-nu.vercel.app` (missing protocol)
+- ❌ **WRONG:** `http://ai-detector-web-nu.vercel.app` (wrong protocol)
+- ❌ **WRONG:** `https://ai-detector-web-nu.vercel.app/` (trailing slash)
+
+(Replace with your actual Vercel deployment URL)
 
 ### Step 3: Add Redirect URLs
 
-In the **Redirect URLs** section, add BOTH:
+In the **Redirect URLs** section, add BOTH (with full URLs):
 ```
 http://localhost:3000/auth/callback
-https://your-app-name.vercel.app/auth/callback
+https://ai-detector-web-nu.vercel.app/auth/callback
 ```
+
+**CRITICAL:** 
+- ✅ **MUST** include full protocol (`http://` or `https://`)
+- ✅ **MUST** include the full path `/auth/callback`
+- ❌ **WRONG:** `localhost:3000/auth/callback` (missing protocol)
+- ❌ **WRONG:** `https://ai-detector-web-nu.vercel.app` (missing path)
 
 **Important:** 
 - Keep `localhost` for local development
 - Add your production URL for production
-- If you have a custom domain, add that too
+- Each URL on a new line or comma-separated
 
 ### Step 4: Verify Environment Variables in Vercel
 
@@ -53,6 +67,19 @@ After updating Supabase settings, test by:
 3. Verify the link points to your production domain
 
 ## Common Issues
+
+### Issue: "requested path is invalid" error
+**Error in email link:** `{"error":"requested path is invalid"}`
+
+**Cause:** Site URL in Supabase is missing the `https://` protocol
+
+**Solution:** 
+1. Go to Supabase Dashboard → Authentication → URL Configuration
+2. Update Site URL to include `https://`:
+   - ❌ Wrong: `ai-detector-web-nu.vercel.app`
+   - ✅ Correct: `https://ai-detector-web-nu.vercel.app`
+3. Save changes
+4. Test with a new signup (old confirmation emails won't work)
 
 ### Issue: Still redirecting to localhost
 **Solution:** Clear your browser cache and cookies, or try in an incognito window
