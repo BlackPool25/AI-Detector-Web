@@ -166,6 +166,28 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-4 border-t border-white/10 space-y-2">
+              {/* Theme toggle for mobile */}
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-white/10 transition-all"
+                aria-label="Toggle theme"
+              >
+                <span>Theme</span>
+                <span className="flex items-center gap-2">
+                  {theme === 'dark' ? (
+                    <>
+                      <Sun className="w-5 h-5" />
+                      <span className="text-xs">Light</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="w-5 h-5" />
+                      <span className="text-xs">Dark</span>
+                    </>
+                  )}
+                </span>
+              </button>
+              
               <Button variant="ghost" className="w-full">
                 Login
               </Button>

@@ -24,12 +24,12 @@ export function Hero() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-4 md:px-8 lg:px-16 pt-20 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center px-4 md:px-8 lg:px-16 pt-32 sm:pt-28 md:pt-24 lg:pt-20 overflow-hidden">
       <motion.div
         variants={staggerContainer}
         initial="initial"
         animate="animate"
-        className="w-full text-center space-y-12"
+        className="w-full text-center space-y-8 sm:space-y-10 md:space-y-12"
       >
         {/* Headline */}
         <motion.div 
