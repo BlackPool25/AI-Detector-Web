@@ -27,7 +27,7 @@ export function validateFile(file: File, mode: 'text' | 'image' | 'video'): Vali
   const extension = '.' + file.name.split('.').pop()?.toLowerCase()
   
   // Check extension
-  if (!config.extensions.includes(extension as any)) {
+  if (!(config.extensions as readonly string[]).includes(extension)) {
     return {
       valid: false,
       error: `Invalid file format. Accepted: ${config.extensions.join(', ')}`
@@ -35,7 +35,7 @@ export function validateFile(file: File, mode: 'text' | 'image' | 'video'): Vali
   }
   
   // Check MIME type
-  if (!config.mimeTypes.includes(file.type as any)) {
+  if (!(config.mimeTypes as readonly string[]).includes(file.type)) {
     return {
       valid: false,
       error: `Invalid file type. Please upload a valid ${mode} file.`
