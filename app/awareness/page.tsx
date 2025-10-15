@@ -56,15 +56,15 @@ export default function AwarenessPage() {
           initial="initial"
           animate="animate"
           variants={staggerContainer}
-          className="text-center space-y-6"
+          className="text-center space-y-6 px-4"
         >
-          <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl font-bold">
+          <motion.h1 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
             The Rise of{' '}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Synthetic Media
             </span>
           </motion.h1>
-          <motion.p variants={fadeInUp} className="text-xl text-foreground/70 max-w-3xl mx-auto">
+          <motion.p variants={fadeInUp} className="text-base sm:text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto">
             Understanding the impact of AI-generated content on society, truth, and trust
           </motion.p>
         </motion.div>
@@ -75,54 +75,54 @@ export default function AwarenessPage() {
           whileInView="animate"
           viewport={{ once: true, margin: '-100px' }}
           variants={staggerContainer}
-          className="space-y-12"
+          className="space-y-12 overflow-hidden"
         >
-          <motion.h2 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-center mb-16">
+          <motion.h2 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight text-center mb-8 sm:mb-12 md:mb-16 px-4">
             Timeline: From Novelty to Crisis
           </motion.h2>
           
-          <div className="relative py-16">
+          <div className="relative py-8 sm:py-12 md:py-16">
             {/* Timeline line with gradient */}
             <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 md:w-2 bg-gradient-to-b from-primary via-accent to-primary opacity-20" />
             
-            <div className="space-y-32 md:space-y-40">
+            <div className="space-y-16 sm:space-y-24 md:space-y-32 lg:space-y-40">
               {timeline.map((item, index) => (
                 <motion.div
                   key={item.year}
                   initial={{ 
                     opacity: 0, 
-                    x: index % 2 === 0 ? -200 : 200,
-                    scale: 0.8
+                    x: index % 2 === 0 ? -50 : 50,
+                    scale: 0.95
                   }}
                   whileInView={{ 
                     opacity: 1, 
                     x: 0,
                     scale: 1
                   }}
-                  viewport={{ once: true, margin: '-100px', amount: 0.3 }}
+                  viewport={{ once: true, margin: '-50px', amount: 0.3 }}
                   transition={{ 
-                    duration: 1.2,
+                    duration: 0.8,
                     ease: [0.25, 0.46, 0.45, 0.94],
                     scale: {
-                      duration: 0.8,
+                      duration: 0.6,
                       ease: 'easeOut'
                     }
                   }}
-                  className={`relative flex items-start gap-4 md:gap-16 ${
+                  className={`relative flex items-start gap-3 sm:gap-4 md:gap-8 lg:gap-16 ${
                     index % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
                   }`}
                 >
                   {/* Content side */}
                   <motion.div 
-                    className={`flex-1 ${index % 2 === 0 ? 'text-right pr-4 md:pr-12' : 'text-left pl-4 md:pl-12'}`}
-                    initial={{ opacity: 0, y: 50 }}
+                    className={`flex-1 ${index % 2 === 0 ? 'text-right pr-2 sm:pr-4 md:pr-8 lg:pr-12' : 'text-left pl-2 sm:pl-4 md:pl-8 lg:pl-12'}`}
+                    initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
                   >
-                    <div className="glass dark:glass-dark rounded-2xl p-6 md:p-8 hover:shadow-2xl transition-all duration-500 border border-primary/10">
+                    <div className="glass dark:glass-dark rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 hover:shadow-2xl transition-all duration-500 border border-primary/10">
                       <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
+                        initial={{ scale: 0.8, rotate: -90 }}
                         whileInView={{ scale: 1, rotate: 0 }}
                         viewport={{ once: true }}
                         transition={{ 
@@ -132,14 +132,14 @@ export default function AwarenessPage() {
                           delay: 0.3
                         }}
                       >
-                        <h3 className="text-5xl md:text-7xl lg:text-8xl font-black text-primary mb-3 md:mb-6">
+                        <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-primary mb-2 sm:mb-3 md:mb-6">
                           {item.year}
                         </h3>
                       </motion.div>
                       
                       <motion.h4 
-                        className="text-xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3 md:mb-4"
-                        initial={{ opacity: 0, x: index % 2 === 0 ? 50 : -50 }}
+                        className="text-base sm:text-lg md:text-2xl lg:text-3xl font-bold text-foreground mb-2 sm:mb-3 md:mb-4"
+                        initial={{ opacity: 0, x: index % 2 === 0 ? 30 : -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.4 }}
@@ -148,7 +148,7 @@ export default function AwarenessPage() {
                       </motion.h4>
                       
                       <motion.p 
-                        className="text-base md:text-xl text-foreground/70 font-light leading-relaxed"
+                        className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground/70 font-light leading-relaxed"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
@@ -172,7 +172,7 @@ export default function AwarenessPage() {
                       delay: 0.1
                     }}
                   >
-                    <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-primary ring-8 md:ring-12 ring-primary/20 relative">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full bg-primary ring-4 sm:ring-6 md:ring-8 lg:ring-10 ring-primary/20 relative">
                       <motion.div
                         className="absolute inset-0 rounded-full bg-primary"
                         animate={{
@@ -202,13 +202,13 @@ export default function AwarenessPage() {
           whileInView="animate"
           viewport={{ once: true, margin: '-100px' }}
           variants={staggerContainer}
-          className="space-y-8"
+          className="space-y-6 sm:space-y-8"
         >
-          <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-center">
+          <motion.h2 variants={fadeInUp} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-center px-4">
             Real-World Impact
           </motion.h2>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
             {impacts.map((impact, index) => {
               const Icon = impact.icon
               return (
@@ -216,13 +216,13 @@ export default function AwarenessPage() {
                   <Card className="h-full glass dark:glass-dark border-foreground/10 hover:shadow-2xl transition-all duration-300">
                     <CardHeader>
                       <div
-                        className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 sm:mb-4"
                         style={{ background: `${impact.color}20` }}
                       >
-                        <Icon className="w-7 h-7" style={{ color: impact.color }} />
+                        <Icon className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: impact.color }} />
                       </div>
-                      <CardTitle>{impact.title}</CardTitle>
-                      <CardDescription className="text-base">{impact.description}</CardDescription>
+                      <CardTitle className="text-lg sm:text-xl">{impact.title}</CardTitle>
+                      <CardDescription className="text-sm sm:text-base">{impact.description}</CardDescription>
                     </CardHeader>
                   </Card>
                 </motion.div>
@@ -237,13 +237,13 @@ export default function AwarenessPage() {
           whileInView="animate"
           viewport={{ once: true, margin: '-100px' }}
           variants={fadeInUp}
-          className="glass dark:glass-dark rounded-3xl p-12 text-center space-y-6"
+          className="glass dark:glass-dark rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 text-center space-y-4 sm:space-y-6"
         >
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight">Why Detection Matters</h2>
-          <blockquote className="text-2xl italic text-foreground/80 max-w-3xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight px-2">Why Detection Matters</h2>
+          <blockquote className="text-lg sm:text-xl md:text-2xl italic text-foreground/80 max-w-3xl mx-auto px-4">
             "Without the ability to distinguish real from synthetic, we lose our shared foundation of truth."
           </blockquote>
-          <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-foreground/70 max-w-2xl mx-auto px-4">
             AI detection technology is not just a tool—it's a necessity for preserving trust, 
             protecting identities, and maintaining the integrity of information in the digital age.
           </p>
@@ -255,13 +255,13 @@ export default function AwarenessPage() {
           whileInView="animate"
           viewport={{ once: true }}
           variants={fadeInUp}
-          className="text-center space-y-6"
+          className="text-center space-y-4 sm:space-y-6 px-4"
         >
-          <h3 className="text-2xl font-bold">Test Your Ability to Spot AI</h3>
+          <h3 className="text-xl sm:text-2xl font-bold">Test Your Ability to Spot AI</h3>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
-            className="px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all"
+            className="w-full sm:w-auto min-h-[48px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all"
           >
             Take the Challenge →
           </motion.button>
