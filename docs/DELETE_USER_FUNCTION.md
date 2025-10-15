@@ -49,6 +49,7 @@ COMMENT ON FUNCTION delete_user() IS 'Allows authenticated users to delete their
 3. Click **New Query**
 4. Paste the SQL above
 5. Click **Run** or press `Ctrl+Enter`
+6. ✅ That's it! No RLS policies needed.
 
 ## What This Does
 
@@ -65,6 +66,7 @@ COMMENT ON FUNCTION delete_user() IS 'Allows authenticated users to delete their
 - Function uses `auth.uid()` to ensure users can only delete their own account
 - `SECURITY DEFINER` is safe here because it's restricted to the user's own data
 - Granted only to `authenticated` role, not `anon`
+- **No RLS policies needed** - The function bypasses RLS with `SECURITY DEFINER` and handles all security checks internally
 
 ## Testing
 

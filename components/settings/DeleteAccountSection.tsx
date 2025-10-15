@@ -74,15 +74,21 @@ export function DeleteAccountSection() {
         // Continue even if history deletion fails
       }
 
-      // Finally, delete the auth user account
-      // Note: This requires the user to be authenticated
+      // Try to delete the auth user account using the database function
       const { error: deleteError } = await supabase.rpc('delete_user')
 
       if (deleteError) {
-        // If RPC doesn't exist, we need to use the admin API
-        // For now, sign out and show message
-        console.error('Error deleting account:', deleteError)
-        throw new Error('Unable to delete account. Please contact support.')
+        console.error('Error calling delete_user function:', deleteError)
+        
+        // If the function doesn't exist, provide helpful error message
+        if (deleteError.message?.includes('function') || deleteError.code === '42883') {
+          throw new Error(
+            'Account deletion is not yet configured. Please contact support to enable this feature.'
+          )
+        }
+        
+        // For other errors, show generic message
+        throw new Error('Unable to delete account. Please try again or contact support.')
       }
 
       // Sign out
