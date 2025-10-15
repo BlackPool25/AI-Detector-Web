@@ -15,19 +15,20 @@ export const metadata: Metadata = {
   title: 'DetectX - Detect AI-Generated Content',
   description: 'Detect AI-generated images, videos, and text instantly. Advanced detection technology for digital authenticity.',
   keywords: ['AI detection', 'deepfake', 'synthetic media', 'AI-generated content', 'DetectX'],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: '#0EA5E9',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'DetectX',
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#0EA5E9',
 }
 
 export default function RootLayout({
