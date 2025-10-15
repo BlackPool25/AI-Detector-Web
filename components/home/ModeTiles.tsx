@@ -47,9 +47,13 @@ export function ModeTiles() {
       setMode(newMode)
     })
 
+    // Match the optimized transition duration (250ms on mobile, 400ms on desktop)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    const duration = isMobile ? 250 : 400
+    
     setTimeout(() => {
       setIsAnimating(false)
-    }, 300) // Reduced from 500ms to 300ms
+    }, duration)
   }
 
   return (

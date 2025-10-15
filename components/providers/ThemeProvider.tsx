@@ -25,11 +25,14 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    // Update the data-mode attribute on the root element
-    // Use requestAnimationFrame for smoother transitions
-    requestAnimationFrame(() => {
-      document.documentElement.setAttribute('data-mode', mode)
-    })
+    // Use requestAnimationFrame for smoother updates on mobile
+    const updateMode = () => {
+      requestAnimationFrame(() => {
+        document.documentElement.setAttribute('data-mode', mode)
+      })
+    }
+    
+    updateMode()
   }, [mode])
 
   useEffect(() => {
