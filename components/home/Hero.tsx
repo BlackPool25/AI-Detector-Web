@@ -39,7 +39,7 @@ export function Hero() {
           onMouseLeave={handleMouseLeave}
         >
           <motion.h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight"
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight px-2"
             style={{
               transformStyle: 'preserve-3d',
               rotateX: titleTilt.x,
@@ -51,7 +51,7 @@ export function Hero() {
               Reality or Illusion?
             </span>
           </motion.h1>
-          <p className="text-xl md:text-2xl lg:text-3xl text-foreground/70 max-w-4xl mx-auto font-light">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-foreground/70 max-w-4xl mx-auto font-light px-4">
             Detect AI-generated images, videos, and text — instantly.
           </p>
         </motion.div>

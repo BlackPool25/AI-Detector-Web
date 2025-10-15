@@ -30,7 +30,7 @@ export default function HomePage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-4xl md:text-6xl lg:text-7xl font-black italic bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black italic bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent px-4"
             >
               "In an age of AI, truth has pixels."
             </motion.blockquote>
@@ -38,7 +38,7 @@ export default function HomePage() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.7 }}
-              className="text-xl md:text-2xl text-foreground/70 max-w-3xl mx-auto font-light"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-foreground/70 max-w-3xl mx-auto font-light px-6"
             >
               Digital authenticity is the foundation of trust. Our detectors help preserve truth in an increasingly synthetic world.
             </motion.p>
@@ -64,7 +64,7 @@ export default function HomePage() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="text-4xl md:text-6xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent px-4"
             >
               Ready to Start Detecting?
             </motion.h2>
@@ -72,7 +72,7 @@ export default function HomePage() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto"
+              className="text-base sm:text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto px-6"
             >
               Join thousands of users who trust our AI detection technology to verify content authenticity.
             </motion.p>
@@ -80,13 +80,13 @@ export default function HomePage() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.7 }}
-              className="flex justify-center"
+              className="flex justify-center px-4"
             >
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: '0 20px 50px rgba(var(--primary-rgb), 0.4)' }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="px-10 py-5 rounded-2xl bg-gradient-to-r from-primary to-accent text-white font-bold text-lg shadow-lg hover:shadow-2xl transition-all"
+                className="w-full sm:w-auto min-h-[48px] px-8 sm:px-10 py-4 sm:py-5 rounded-2xl bg-gradient-to-r from-primary to-accent text-white font-bold text-base sm:text-lg shadow-lg hover:shadow-2xl transition-all"
               >
                 Start Detecting →
               </motion.button>

@@ -64,20 +64,28 @@ export function HowItWorks() {
     const heading = headingRef.current
     const subheading = subheadingRef.current
 
-    // Split heading into individual characters/words for animation
+    // Check if user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    
+    // Check if mobile device for performance optimization
+    const isMobile = window.innerWidth < 768
+
+    // Split heading into individual characters/words for animation (skip on mobile for performance)
     const headingText = heading.textContent || ''
-    heading.innerHTML = headingText
-      .split('')
-      .map((char) => `<span class="char" style="display: inline-block; opacity: 0; transform: scaleY(0) translateY(-50px);">${char === ' ' ? '&nbsp;' : char}</span>`)
-      .join('')
+    if (!isMobile && !prefersReducedMotion) {
+      heading.innerHTML = headingText
+        .split('')
+        .map((char) => `<span class="char" style="display: inline-block; opacity: 0; transform: scaleY(0) translateY(-50px); will-change: transform, opacity;">${char === ' ' ? '&nbsp;' : char}</span>`)
+        .join('')
+    }
 
     const chars = heading.querySelectorAll('.char')
 
-    // Animate section stretching down
+    // Animate section stretching down (simplified on mobile)
     gsap.fromTo(
       section,
       {
-        scaleY: 0,
+        scaleY: isMobile ? 1 : 0,
         transformOrigin: 'top center',
         opacity: 0,
       },
@@ -88,34 +96,52 @@ export function HowItWorks() {
           trigger: section,
           start: 'top 90%',
           end: 'top 60%',
-          scrub: 1,
+          scrub: isMobile ? 0.5 : 1, // Faster on mobile
         },
       }
     )
 
-    // Animate characters falling into place
-    gsap.to(chars, {
-      opacity: 1,
-      scaleY: 1,
-      translateY: 0,
-      stagger: {
-        amount: 0.8,
-        from: 'center',
-      },
-      scrollTrigger: {
-        trigger: heading,
-        start: 'top 85%',
-        end: 'top 40%',
-        scrub: 1,
-      },
-    })
+    // Animate characters falling into place (only on desktop)
+    if (chars.length > 0 && !isMobile && !prefersReducedMotion) {
+      gsap.to(chars, {
+        opacity: 1,
+        scaleY: 1,
+        translateY: 0,
+        stagger: {
+          amount: 0.8,
+          from: 'center',
+        },
+        scrollTrigger: {
+          trigger: heading,
+          start: 'top 85%',
+          end: 'top 40%',
+          scrub: 1,
+        },
+      })
+    } else {
+      // Simple fade-in for mobile
+      gsap.fromTo(
+        heading,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          scrollTrigger: {
+            trigger: heading,
+            start: 'top 85%',
+            end: 'top 60%',
+            scrub: 0.5,
+          },
+        }
+      )
+    }
 
     // Animate subheading
     gsap.fromTo(
       subheading,
       {
         opacity: 0,
-        y: 30,
+        y: isMobile ? 20 : 30,
       },
       {
         opacity: 1,
@@ -124,7 +150,7 @@ export function HowItWorks() {
           trigger: subheading,
           start: 'top 85%',
           end: 'top 60%',
-          scrub: 1,
+          scrub: isMobile ? 0.5 : 1,
         },
       }
     )
@@ -154,16 +180,16 @@ export function HowItWorks() {
           className="space-y-12"
         >
           {/* Section header */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-4 px-4">
             <h2 
               ref={headingRef}
-              className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight"
             >
               How Our Detectors Work
             </h2>
             <p 
               ref={subheadingRef}
-              className="text-lg text-foreground/70 max-w-2xl mx-auto"
+              className="text-base sm:text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto"
             >
               Advanced AI models trained on millions of samples to identify synthetic content
             </p>
@@ -296,13 +322,13 @@ export function HowItWorks() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="mt-20 max-w-4xl mx-auto"
+            className="mt-12 sm:mt-16 md:mt-20 max-w-4xl mx-auto px-4"
           >
             <motion.h3 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold text-center mb-16"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 md:mb-16"
             >
               Detection Pipeline
             </motion.h3>
@@ -318,7 +344,7 @@ export function HowItWorks() {
                 style={{ transformOrigin: 'top' }}
               />
 
-              <div className="space-y-12">
+              <div className="space-y-8 sm:space-y-10 md:space-y-12">
                 {[
                   { 
                     icon: Zap, 
@@ -367,7 +393,7 @@ export function HowItWorks() {
                         delay: index * 0.2,
                         ease: [0.25, 0.46, 0.45, 0.94],
                       }}
-                      className="relative flex items-start gap-6 md:gap-12"
+                        className="relative flex items-start gap-4 sm:gap-6 md:gap-12"
                     >
                       {/* Step indicator */}
                       <div className="relative flex-shrink-0">
@@ -433,17 +459,17 @@ export function HowItWorks() {
 
                       {/* Content */}
                       <motion.div
-                        className="flex-1 pb-8"
+                        className="flex-1 pb-4 sm:pb-6 md:pb-8"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
                       >
-                        <div className="glass dark:glass-dark rounded-2xl p-6 md:p-8 border-l-4 hover:shadow-xl transition-all duration-500" style={{ borderLeftColor: item.color }}>
-                          <h4 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: item.color }}>
+                        <div className="glass dark:glass-dark rounded-2xl p-4 sm:p-6 md:p-8 border-l-4 hover:shadow-xl transition-all duration-500" style={{ borderLeftColor: item.color }}>
+                          <h4 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3" style={{ color: item.color }}>
                             {item.title}
                           </h4>
-                          <p className="text-foreground/70 mb-4 leading-relaxed">
+                          <p className="text-sm sm:text-base text-foreground/70 mb-3 sm:mb-4 leading-relaxed">
                             {item.description}
                           </p>
                           

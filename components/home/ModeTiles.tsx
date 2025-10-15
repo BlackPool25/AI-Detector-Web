@@ -49,7 +49,7 @@ export function ModeTiles() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+    <div className="flex flex-col md:flex-row gap-4 sm:gap-6 justify-center items-center w-full max-w-5xl mx-auto px-4">
       {modes.map((modeItem) => {
         const isActive = mode === modeItem.id
         const Icon = modeItem.icon
@@ -59,8 +59,9 @@ export function ModeTiles() {
             key={modeItem.id}
             onClick={() => handleModeClick(modeItem.id)}
             className={cn(
-              'relative group w-48 h-48 md:w-56 md:h-56 rounded-2xl transition-all duration-300',
+              'relative group w-full max-w-[280px] h-44 sm:h-48 md:w-56 md:h-56 rounded-2xl transition-all duration-300',
               'glass dark:glass-dark',
+              'min-h-[44px]', // Minimum touch target size
               isActive && 'ring-2 ring-primary shadow-2xl'
             )}
             whileHover={!isActive ? { scale: 1.05, y: -5 } : {}}
