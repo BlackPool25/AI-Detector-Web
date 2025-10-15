@@ -63,20 +63,6 @@ export function Hero() {
 
         {/* Upload Button */}
         <UploadButton onClick={() => setIsModalOpen(true)} />
-
-        {/* Scroll indicator */}
-        <motion.div
-          variants={fadeInUp}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-6 h-10 border-2 border-foreground/30 rounded-full flex items-start justify-center p-2"
-          >
-            <motion.div className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
-          </motion.div>
-        </motion.div>
       </motion.div>
 
       {/* Upload Modal */}

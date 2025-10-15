@@ -165,31 +165,43 @@ export default function HowItWorksPage() {
                     <div className="relative flex-shrink-0">
                       {/* Main Icon Circle */}
                       <motion.div
-                        className="relative w-16 h-16 md:w-28 md:h-28 rounded-full flex items-center justify-center z-10"
+                        className="relative w-16 h-16 md:w-28 md:h-28 rounded-full flex items-center justify-center z-10 overflow-hidden"
                         style={{ background: `${color}20` }}
-                        whileHover={{ scale: 1.1, rotate: 360 }}
+                        whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.6 }}
                       >
-                        {/* Pulsing ring */}
+                        {/* Rotating gradient border effect */}
                         <motion.div
                           className="absolute inset-0 rounded-full"
-                          style={{ background: color }}
-                          animate={{
-                            scale: [1, 1.5, 1],
-                            opacity: [0.4, 0, 0.4],
+                          style={{
+                            background: `conic-gradient(from 0deg, ${color}, transparent, ${color})`,
+                            opacity: 0.6,
+                          }}
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                        />
+
+                        {/* Subtle bounce animation */}
+                        <motion.div
+                          animate={{ 
+                            y: [-2, 2, -2],
                           }}
                           transition={{
-                            duration: 2.5,
+                            duration: 2,
                             repeat: Infinity,
                             ease: 'easeInOut',
                             delay: index * 0.3,
                           }}
-                        />
-                        
-                        <Icon 
-                          className="w-8 h-8 md:w-14 md:h-14 relative z-10" 
-                          style={{ color }} 
-                        />
+                        >
+                          <Icon 
+                            className="w-8 h-8 md:w-14 md:h-14 relative z-10" 
+                            style={{ color }} 
+                          />
+                        </motion.div>
                       </motion.div>
 
                       {/* Step number badge */}
@@ -298,18 +310,30 @@ export default function HowItWorksPage() {
                     {/* Header */}
                     <div className="flex items-center gap-6 mb-8 relative z-10">
                       <motion.div
-                        className="relative w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center"
+                        className="relative w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center overflow-hidden"
                         style={{ background: `${method.color}20` }}
-                        whileHover={{ scale: 1.1, rotate: 360 }}
+                        whileHover={{ scale: 1.1 }}
                         transition={{ duration: 0.6 }}
                       >
-                        {/* Pulsing background */}
+                        {/* Rotating gradient border effect */}
                         <motion.div
                           className="absolute inset-0 rounded-full"
-                          style={{ background: method.color }}
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.3, 0, 0.3],
+                          style={{
+                            background: `conic-gradient(from 0deg, ${method.color}, transparent, ${method.color})`,
+                            opacity: 0.6,
+                          }}
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: 'linear',
+                          }}
+                        />
+                        
+                        {/* Subtle bounce animation */}
+                        <motion.div
+                          animate={{ 
+                            y: [-2, 2, -2],
                           }}
                           transition={{
                             duration: 2,
@@ -317,8 +341,9 @@ export default function HowItWorksPage() {
                             ease: 'easeInOut',
                             delay: index * 0.3,
                           }}
-                        />
-                        <Icon className="w-10 h-10 md:w-12 md:h-12 relative z-10" style={{ color: method.color }} />
+                        >
+                          <Icon className="w-10 h-10 md:w-12 md:h-12 relative z-10" style={{ color: method.color }} />
+                        </motion.div>
                       </motion.div>
                       
                       <h3 className="text-3xl md:text-4xl font-bold" style={{ color: method.color }}>

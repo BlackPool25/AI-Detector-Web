@@ -14,10 +14,8 @@ export default function HomePage() {
         <Hero />
       </ScrollSection>
 
-      {/* How It Works - Wipe from Right to Left */}
-      <ScrollSection transitionType="wipe-left">
-        <HowItWorks />
-      </ScrollSection>
+      {/* How It Works - Stretch Animation */}
+      <HowItWorks />
       
       {/* Quote Section - Wipe from Left to Right */}
       <ScrollSection transitionType="wipe-right">
@@ -82,21 +80,15 @@ export default function HomePage() {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.7 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center"
+              className="flex justify-center"
             >
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: '0 20px 50px rgba(var(--primary-rgb), 0.4)' }}
                 whileTap={{ scale: 0.97 }}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className="px-10 py-5 rounded-2xl bg-gradient-to-r from-primary to-accent text-white font-bold text-lg shadow-lg hover:shadow-2xl transition-all"
               >
                 Start Detecting →
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-10 py-5 rounded-2xl border-2 border-primary bg-transparent font-bold text-lg hover:bg-primary hover:text-primary-foreground transition-all"
-              >
-                Explore API
               </motion.button>
             </motion.div>
           </motion.div>

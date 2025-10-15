@@ -84,17 +84,30 @@ export function StatsSection() {
 
                   {/* Icon */}
                   <motion.div
-                    className="relative w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+                    className="relative w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center overflow-hidden"
                     style={{ background: `${stat.color}20` }}
-                    whileHover={{ scale: 1.1, rotate: 360 }}
+                    whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.6 }}
                   >
+                    {/* Rotating gradient border effect */}
                     <motion.div
                       className="absolute inset-0 rounded-2xl"
-                      style={{ background: stat.color }}
-                      animate={{
-                        scale: [1, 1.3, 1],
-                        opacity: [0.3, 0, 0.3],
+                      style={{
+                        background: `conic-gradient(from 0deg, ${stat.color}, transparent, ${stat.color})`,
+                        opacity: 0.6,
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: 'linear',
+                      }}
+                    />
+                    
+                    {/* Subtle bounce animation */}
+                    <motion.div
+                      animate={{ 
+                        y: [-2, 2, -2],
                       }}
                       transition={{
                         duration: 2,
@@ -102,8 +115,9 @@ export function StatsSection() {
                         ease: 'easeInOut',
                         delay: index * 0.3,
                       }}
-                    />
-                    <Icon className="w-10 h-10 relative z-10" style={{ color: stat.color }} />
+                    >
+                      <Icon className="w-10 h-10 relative z-10" style={{ color: stat.color }} />
+                    </motion.div>
                   </motion.div>
 
                   {/* Value */}

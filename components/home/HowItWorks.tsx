@@ -1,11 +1,15 @@
 'use client'
 
-import React from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FileText, Image, Video, Activity, Brain, CheckCircle, Zap, Shield, Sparkles } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { TiltText } from '@/components/animations/TiltText'
 import { fadeInUp, staggerContainer } from '@/lib/animationVariants'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const detectors = [
   {
@@ -47,8 +51,100 @@ const detectors = [
 ]
 
 export function HowItWorks() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const subheadingRef = useRef<HTMLParagraphElement>(null)
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
+
+  // GSAP Dynamic Text Reveal Animation
+  useEffect(() => {
+    if (!sectionRef.current || !headingRef.current || !subheadingRef.current) return
+
+    const section = sectionRef.current
+    const heading = headingRef.current
+    const subheading = subheadingRef.current
+
+    // Split heading into individual characters/words for animation
+    const headingText = heading.textContent || ''
+    heading.innerHTML = headingText
+      .split('')
+      .map((char) => `<span class="char" style="display: inline-block; opacity: 0; transform: scaleY(0) translateY(-50px);">${char === ' ' ? '&nbsp;' : char}</span>`)
+      .join('')
+
+    const chars = heading.querySelectorAll('.char')
+
+    // Animate section stretching down
+    gsap.fromTo(
+      section,
+      {
+        scaleY: 0,
+        transformOrigin: 'top center',
+        opacity: 0,
+      },
+      {
+        scaleY: 1,
+        opacity: 1,
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 90%',
+          end: 'top 60%',
+          scrub: 1,
+        },
+      }
+    )
+
+    // Animate characters falling into place
+    gsap.to(chars, {
+      opacity: 1,
+      scaleY: 1,
+      translateY: 0,
+      stagger: {
+        amount: 0.8,
+        from: 'center',
+      },
+      scrollTrigger: {
+        trigger: heading,
+        start: 'top 85%',
+        end: 'top 40%',
+        scrub: 1,
+      },
+    })
+
+    // Animate subheading
+    gsap.fromTo(
+      subheading,
+      {
+        opacity: 0,
+        y: 30,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scrollTrigger: {
+          trigger: subheading,
+          start: 'top 85%',
+          end: 'top 60%',
+          scrub: 1,
+        },
+      }
+    )
+
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (trigger.vars.trigger === section || trigger.vars.trigger === heading || trigger.vars.trigger === subheading) {
+          trigger.kill()
+        }
+      })
+    }
+  }, [])
+
+  // Card expand/collapse handlers
+  const handleCardInteraction = (cardId: string) => {
+    setExpandedCard(expandedCard === cardId ? null : cardId)
+  }
+
   return (
-    <section className="relative py-20 px-4 md:px-8 lg:px-16">
+    <section ref={sectionRef} className="relative py-20 px-4 md:px-8 lg:px-16">
       <div className="w-full">
         <motion.div
           initial="initial"
@@ -58,21 +154,26 @@ export function HowItWorks() {
           className="space-y-12"
         >
           {/* Section header */}
-          <motion.div variants={fadeInUp} className="text-center space-y-4">
-            <TiltText>
-              <h2 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight">
-                How Our Detectors Work
-              </h2>
-            </TiltText>
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+          <div className="text-center space-y-4">
+            <h2 
+              ref={headingRef}
+              className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight"
+            >
+              How Our Detectors Work
+            </h2>
+            <p 
+              ref={subheadingRef}
+              className="text-lg text-foreground/70 max-w-2xl mx-auto"
+            >
               Advanced AI models trained on millions of samples to identify synthetic content
             </p>
-          </motion.div>
+          </div>
 
           {/* Detection cards */}
           <div className="grid md:grid-cols-3 gap-8">
             {detectors.map((detector, index) => {
               const Icon = detector.icon
+              const isExpanded = expandedCard === detector.title
 
               return (
                 <motion.div
@@ -85,55 +186,55 @@ export function HowItWorks() {
                     delay: index * 0.2,
                     ease: [0.25, 0.46, 0.45, 0.94],
                   }}
-                  whileHover={{
-                    y: -20,
-                    scale: 1.05,
-                    transition: { duration: 0.3 },
-                  }}
+                  onHoverStart={() => handleCardInteraction(detector.title)}
+                  onHoverEnd={() => setExpandedCard(null)}
+                  onClick={() => handleCardInteraction(detector.title)}
+                  className="cursor-pointer"
                 >
                   <Card className="h-full glass dark:glass-dark border-foreground/10 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
-                    {/* Animated background gradient */}
+                    {/* Gradient shimmer effect on hover */}
                     <motion.div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                       style={{
-                        background: `radial-gradient(circle at 50% 50%, ${detector.color}15, transparent 70%)`,
+                        background: `linear-gradient(135deg, ${detector.color}20, transparent 50%, ${detector.color}20)`,
+                        backgroundSize: '200% 200%',
                       }}
                       animate={{
-                        scale: [1, 1.2, 1],
+                        backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
                       }}
                       transition={{
                         duration: 3,
                         repeat: Infinity,
-                        ease: 'easeInOut',
+                        ease: 'linear',
                       }}
                     />
                     
                     <CardHeader className="relative z-10">
                       <motion.div
-                        className="relative w-20 h-20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500"
+                        className="relative w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
                         style={{
                           background: `${detector.color}20`,
                         }}
-                        whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-                        transition={{ duration: 0.5 }}
+                        animate={isExpanded ? { scale: 1.1, rotate: 360 } : { scale: 1, rotate: 0 }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
                       >
-                        {/* Pulsing background */}
+                        {/* Rotating gradient border */}
                         <motion.div
                           className="absolute inset-0 rounded-2xl"
-                          style={{ background: detector.color }}
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.3, 0, 0.3],
+                          style={{
+                            background: `conic-gradient(from 0deg, ${detector.color}, transparent, ${detector.color})`,
+                            opacity: 0.5,
                           }}
+                          animate={{ rotate: 360 }}
                           transition={{
-                            duration: 2,
+                            duration: 3,
                             repeat: Infinity,
-                            ease: 'easeInOut',
+                            ease: 'linear',
                           }}
                         />
                         
                         <Icon
-                          className="w-10 h-10 relative z-10"
+                          className="w-10 h-10 relative z-10 transition-all duration-300"
                           style={{ color: detector.color }}
                         />
                       </motion.div>
@@ -143,42 +244,45 @@ export function HowItWorks() {
                     </CardHeader>
                     
                     <CardContent className="relative z-10">
-                      <ul className="space-y-3">
-                        {detector.features.map((feature, featureIndex) => (
-                          <motion.li
-                            key={feature}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{
-                              duration: 0.5,
-                              delay: index * 0.2 + featureIndex * 0.1,
-                            }}
-                            className="flex items-start space-x-3 text-sm group/item"
-                          >
-                            <motion.div
-                              whileHover={{ scale: 1.2, rotate: 360 }}
-                              transition={{ duration: 0.5 }}
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={isExpanded ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <ul className="space-y-3 pt-2">
+                          {detector.features.map((feature, featureIndex) => (
+                            <motion.li
+                              key={feature}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={isExpanded ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                              transition={{
+                                duration: 0.3,
+                                delay: featureIndex * 0.05,
+                              }}
+                              className="flex items-start space-x-3 text-sm"
                             >
                               <CheckCircle
                                 className="w-5 h-5 mt-0.5 flex-shrink-0"
                                 style={{ color: detector.color }}
                               />
-                            </motion.div>
-                            <span className="text-foreground/70 group-hover/item:text-foreground transition-colors">
-                              {feature}
-                            </span>
-                          </motion.li>
-                        ))}
-                      </ul>
+                              <span className="text-foreground/70">
+                                {feature}
+                              </span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </motion.div>
                     </CardContent>
                     
-                    {/* Corner accent */}
-                    <div 
-                      className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+                    {/* Corner accent with magnetic effect */}
+                    <motion.div 
+                      className="absolute top-0 right-0 w-32 h-32 opacity-10 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none"
                       style={{
                         background: `radial-gradient(circle at top right, ${detector.color}, transparent)`,
                       }}
+                      animate={isExpanded ? { scale: 1.2 } : { scale: 1 }}
+                      transition={{ duration: 0.3 }}
                     />
                   </Card>
                 </motion.div>
@@ -250,10 +354,12 @@ export function HowItWorks() {
                   },
                 ].map((item, index) => {
                   const StepIcon = item.icon
+                  const isEven = index % 2 === 0
+                  
                   return (
                     <motion.div
                       key={item.step}
-                      initial={{ opacity: 0, x: -100 }}
+                      initial={{ opacity: 0, x: isEven ? -100 : 100 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: '-50px' }}
                       transition={{
@@ -266,18 +372,30 @@ export function HowItWorks() {
                       {/* Step indicator */}
                       <div className="relative flex-shrink-0">
                         <motion.div
-                          className="relative w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center"
+                          className="relative w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center overflow-hidden"
                           style={{ background: `${item.color}20` }}
-                          whileHover={{ scale: 1.1, rotate: 360 }}
+                          whileHover={{ scale: 1.1 }}
                           transition={{ duration: 0.6 }}
                         >
-                          {/* Pulsing ring */}
+                          {/* Rotating gradient border effect */}
                           <motion.div
                             className="absolute inset-0 rounded-full"
-                            style={{ background: item.color }}
-                            animate={{
-                              scale: [1, 1.4, 1],
-                              opacity: [0.4, 0, 0.4],
+                            style={{
+                              background: `conic-gradient(from 0deg, ${item.color}, transparent, ${item.color})`,
+                              opacity: 0.6,
+                            }}
+                            animate={{ rotate: 360 }}
+                            transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              ease: 'linear',
+                            }}
+                          />
+
+                          {/* Subtle bounce animation */}
+                          <motion.div
+                            animate={{ 
+                              y: [-2, 2, -2],
                             }}
                             transition={{
                               duration: 2,
@@ -285,12 +403,12 @@ export function HowItWorks() {
                               ease: 'easeInOut',
                               delay: index * 0.3,
                             }}
-                          />
-                          
-                          <StepIcon 
-                            className="w-8 h-8 md:w-12 md:h-12 relative z-10" 
-                            style={{ color: item.color }} 
-                          />
+                          >
+                            <StepIcon 
+                              className="w-8 h-8 md:w-12 md:h-12 relative z-10" 
+                              style={{ color: item.color }} 
+                            />
+                          </motion.div>
                         </motion.div>
 
                         {/* Step number badge */}
