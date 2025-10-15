@@ -50,7 +50,7 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
   } | null>(null)
 
   const config = modeConfig[mode]
-  const Icon = config.icon
+  const Icon = config.icon as React.ElementType<{ className?: string; style?: React.CSSProperties }>
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()

@@ -60,7 +60,7 @@ export function ModeTiles() {
     <div className="flex flex-col md:flex-row gap-4 sm:gap-6 justify-center items-center w-full max-w-5xl mx-auto px-4">
       {modes.map((modeItem) => {
         const isActive = mode === modeItem.id
-        const Icon = modeItem.icon
+        const Icon = modeItem.icon as React.ElementType<{ className?: string }>
 
         return (
           <motion.button

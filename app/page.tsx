@@ -9,10 +9,8 @@ import { motion } from 'framer-motion'
 export default function HomePage() {
   return (
     <div className="relative">
-      {/* Hero Section - Split Transition */}
-      <ScrollSection transitionType="split">
-        <Hero />
-      </ScrollSection>
+      {/* Hero Section - Custom Scroll Pinned Animation */}
+      <Hero />
 
       {/* How It Works - Stretch Animation */}
       <HowItWorks />
