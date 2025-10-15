@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react'
+import { Menu, X, Moon, Sun, User, LogOut, Settings } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useMode } from '@/components/providers/ThemeProvider'
 import { Button } from '@/components/ui/Button'
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import type { UserProfile } from '@/types/profile'
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -30,6 +31,7 @@ export function Navbar() {
   const { mode } = useMode()
   const [mounted, setMounted] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -41,16 +43,40 @@ export function Navbar() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      if (user) {
+        fetchProfile(user.id)
+      }
     }
     getUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchProfile(session.user.id)
+      } else {
+        setProfile(null)
+      }
     })
 
     return () => subscription.unsubscribe()
   }, [supabase])
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) throw error
+      setProfile(data)
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+      setProfile(null)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -167,9 +193,29 @@ export function Navbar() {
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
                   >
-                    <User className="w-5 h-5" />
+                    {profile?.avatar_url ? (
+                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary">
+                        <Image
+                          src={profile.avatar_url}
+                          alt="Profile"
+                          width={32}
+                          height={32}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-700">
+                        <Image
+                          src="/default-avatar.svg"
+                          alt="Default avatar"
+                          width={32}
+                          height={32}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    )}
                     <span className="text-sm font-medium max-w-[150px] truncate">
-                      {user.email}
+                      {profile?.username || user.email}
                     </span>
                   </button>
                   {showUserMenu && (
@@ -178,6 +224,14 @@ export function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       className="absolute right-0 mt-2 w-48 glass dark:glass-dark rounded-lg shadow-lg overflow-hidden"
                     >
+                      <Link
+                        href="/settings"
+                        onClick={() => setShowUserMenu(false)}
+                        className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors"
+                      >
+                        <Settings className="w-4 h-4" />
+                        <span>Settings</span>
+                      </Link>
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors"
@@ -266,9 +320,39 @@ export function Navbar() {
                       Dashboard
                     </Button>
                   </Link>
-                  <div className="px-4 py-3 text-sm text-foreground/60 truncate">
-                    {user.email}
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    {profile?.avatar_url ? (
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary flex-shrink-0">
+                        <Image
+                          src={profile.avatar_url}
+                          alt="Profile"
+                          width={40}
+                          height={40}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 dark:border-gray-700 flex-shrink-0">
+                        <Image
+                          src="/default-avatar.svg"
+                          alt="Default avatar"
+                          width={40}
+                          height={40}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                    )}
+                    <div className="text-sm truncate">
+                      <div className="font-medium">{profile?.username || 'User'}</div>
+                      <div className="text-foreground/60 text-xs truncate">{user.email}</div>
+                    </div>
                   </div>
+                  <Link href="/settings" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" className="w-full">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </Button>
+                  </Link>
                   <Button variant="default" className="w-full" onClick={handleLogout}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout

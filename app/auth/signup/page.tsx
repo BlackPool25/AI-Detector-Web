@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
 export default function SignupPage() {
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -33,6 +34,19 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
+    // Validate username
+    if (username.trim().length < 3) {
+      setError('Username must be at least 3 characters')
+      setLoading(false)
+      return
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(username.trim())) {
+      setError('Username can only contain letters, numbers, hyphens, and underscores')
+      setLoading(false)
+      return
+    }
+
     // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match')
@@ -48,6 +62,18 @@ export default function SignupPage() {
     }
 
     try {
+      // Check if username already exists
+      const { data: existingProfile } = await supabase
+        .from('user_profiles')
+        .select('username')
+        .eq('username', username.trim())
+        .single()
+
+      if (existingProfile) {
+        throw new Error('Username already taken. Please choose another.')
+      }
+
+      // Create auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -59,6 +85,22 @@ export default function SignupPage() {
       if (error) throw error
 
       if (data.user) {
+        // Create user profile
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: data.user.id,
+            username: username.trim(),
+            bio: null,
+            avatar_url: null,
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Don't fail the signup if profile creation fails
+          // User can create it later or we can handle it in the callback
+        }
+
         setSuccess(true)
         // If email confirmation is disabled, redirect to dashboard
         if (data.session) {
@@ -112,6 +154,26 @@ export default function SignupPage() {
               {error}
             </div>
           )}
+
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium mb-2">
+              Username
+            </label>
+            <Input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Choose a username"
+              required
+              disabled={loading}
+              minLength={3}
+              pattern="[a-zA-Z0-9_-]+"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Minimum 3 characters. Letters, numbers, hyphens, and underscores only.
+            </p>
+          </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">
