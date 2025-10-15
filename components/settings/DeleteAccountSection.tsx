@@ -74,24 +74,30 @@ export function DeleteAccountSection() {
         // Continue even if history deletion fails
       }
 
-      // Try to delete the auth user account using the database function
-      const { error: deleteError } = await supabase.rpc('delete_user')
-
-      if (deleteError) {
-        console.error('Error calling delete_user function:', deleteError)
-        
-        // If the function doesn't exist, provide helpful error message
-        if (deleteError.message?.includes('function') || deleteError.code === '42883') {
-          throw new Error(
-            'Account deletion is not yet configured. Please contact support to enable this feature.'
-          )
-        }
-        
-        // For other errors, show generic message
-        throw new Error('Unable to delete account. Please try again or contact support.')
+      // Get the session to get the access token
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        throw new Error('No active session')
       }
 
-      // Sign out
+      // Call the API route to delete the user account
+      const response = await fetch('/api/auth/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ password })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete account')
+      }
+
+      // Sign out locally
       await supabase.auth.signOut()
 
       // Redirect to home with success message

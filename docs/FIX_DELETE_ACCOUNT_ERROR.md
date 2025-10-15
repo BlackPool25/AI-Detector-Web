@@ -1,4 +1,4 @@
-# IMPORTANT: Run This SQL Now!
+# IMPORTANT: Setup Required!
 
 ## The Error You're Seeing
 
@@ -6,58 +6,41 @@
 Unable to delete account. Please contact support.
 ```
 
-This means the database function hasn't been created yet.
+This means the delete account feature requires the service role key to be configured.
 
-## Fix: Run This SQL in Supabase (Takes 30 seconds)
+## Fix: No SQL Required!
 
-### Step 1: Open Supabase SQL Editor
+The delete account feature now uses an API route instead of a database function.
 
-Click this link: https://app.supabase.com/project/cjkcwycnetdhumtqthuk/sql/new
+### What You Need
 
-### Step 2: Copy and Paste This SQL
+Make sure your `.env.local` file has the `SUPABASE_SERVICE_ROLE_KEY`:
 
-```sql
--- Function to delete user account
-CREATE OR REPLACE FUNCTION delete_user()
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  user_id uuid;
-BEGIN
-  -- Get current user ID
-  user_id := auth.uid();
-  
-  -- Verify user is authenticated
-  IF user_id IS NULL THEN
-    RAISE EXCEPTION 'Not authenticated';
-  END IF;
-  
-  -- Delete user data (order matters due to foreign keys)
-  DELETE FROM public.detection_history WHERE user_id = delete_user.user_id;
-  DELETE FROM public.user_profiles WHERE id = delete_user.user_id;
-  DELETE FROM auth.users WHERE id = delete_user.user_id;
-END;
-$$;
-
--- Grant permission to authenticated users
-GRANT EXECUTE ON FUNCTION delete_user() TO authenticated;
-
--- Add description
-COMMENT ON FUNCTION delete_user() IS 'Allows users to delete their own account';
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key  # ← Make sure this is set!
 ```
 
-### Step 3: Click "RUN" (or press Ctrl+Enter)
+### Where to Find the Service Role Key
 
-You should see: `Success. No rows returned`
+1. Go to: https://app.supabase.com/project/cjkcwycnetdhumtqthuk/settings/api
+2. Scroll to **Project API keys**
+3. Copy the `service_role` key (keep it secret!)
+4. Add it to your `.env.local` file
 
-### Step 4: Test Delete Account
+### Deploy to Vercel
 
-Go back to Settings → Danger Zone → Delete Account
+Also add the `SUPABASE_SERVICE_ROLE_KEY` to your Vercel environment variables:
 
-It should work now! ✅
+1. Go to your Vercel dashboard
+2. Select your project
+3. Go to **Settings** → **Environment Variables**  
+4. Add `SUPABASE_SERVICE_ROLE_KEY` with the value from Supabase
+
+### That's It! ✅
+
+No SQL commands needed. The feature uses the Supabase Admin API to delete users securely.
 
 ---
 
