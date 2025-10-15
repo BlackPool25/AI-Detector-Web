@@ -29,20 +29,9 @@ const mission = [
 
 const team = [
   {
-    name: 'Dr. Sarah Chen',
-    role: 'Lead Researcher',
-    bio: 'PhD in Computer Vision, 10+ years in AI research',
-    image: '👩‍🔬',
-    social: {
-      github: 'https://github.com',
-      linkedin: 'https://linkedin.com',
-      twitter: 'https://twitter.com',
-    },
-  },
-  {
-    name: 'Alex Rodriguez',
-    role: 'ML Engineer',
-    bio: 'Specializing in deep learning and neural networks',
+    name: 'Shreyas S Joshi',
+    role: 'AIML Engineering',
+    bio: 'BMSIT',
     image: '👨‍💻',
     social: {
       github: 'https://github.com',
@@ -51,10 +40,10 @@ const team = [
     },
   },
   {
-    name: 'Maya Patel',
-    role: 'Data Scientist',
-    bio: 'Expert in NLP and text analysis',
-    image: '👩‍💼',
+    name: 'Sisir Raj',
+    role: 'AIML Engineering',
+    bio: 'BMSIT',
+    image: '👨‍💻',
     social: {
       github: 'https://github.com',
       linkedin: 'https://linkedin.com',
@@ -62,10 +51,21 @@ const team = [
     },
   },
   {
-    name: 'Jordan Kim',
-    role: 'Full Stack Developer',
-    bio: 'Building the platform and user experience',
-    image: '👨‍🎨',
+    name: 'Gowtham MR',
+    role: 'AIML Engineering',
+    bio: 'BMSIT',
+    image: '👨‍💻',
+    social: {
+      github: 'https://github.com',
+      linkedin: 'https://linkedin.com',
+      twitter: 'https://twitter.com',
+    },
+  },
+  {
+    name: 'Ayush Yadav',
+    role: 'AIML Engineering',
+    bio: 'BMSIT',
+    image: '👨‍💻',
     social: {
       github: 'https://github.com',
       linkedin: 'https://linkedin.com',
@@ -156,18 +156,20 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-center">Our Story</h2>
           <div className="space-y-4 text-lg text-foreground/80 max-w-3xl mx-auto">
             <p>
-              AI Detection Hub was founded in 2023 by a team of researchers and engineers 
-              who witnessed the rapid proliferation of synthetic media and recognized the 
-              urgent need for reliable detection tools.
+              DetectX is an innovative college project developed in 2025 by a passionate team of 
+              engineering students from BMSIT. Recognizing the growing challenge of AI-generated 
+              content, we set out to create an accessible platform for detecting synthetic media.
             </p>
             <p>
-              What started as an academic research project has evolved into a comprehensive 
-              platform serving thousands of users—from journalists verifying sources to 
-              educators teaching media literacy.
+              What began as an academic exploration has transformed into a comprehensive detection 
+              tool combining cutting-edge machine learning techniques with modern web technologies. 
+              Our platform aims to help users distinguish between authentic and AI-generated content 
+              across text, images, and videos.
             </p>
             <p>
-              We believe that as AI generation becomes ubiquitous, detection technology 
-              must remain accessible, transparent, and constantly evolving.
+              As students learning and building at the forefront of AI technology, we believe in 
+              making detection tools accessible to everyone. This project represents our commitment 
+              to addressing real-world challenges through innovative technical solutions.
             </p>
           </div>
         </motion.section>

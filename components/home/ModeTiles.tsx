@@ -41,11 +41,15 @@ export function ModeTiles() {
     if (mode === newMode || isAnimating) return
 
     setIsAnimating(true)
-    setMode(newMode)
+    
+    // Use requestAnimationFrame for smoother transition
+    requestAnimationFrame(() => {
+      setMode(newMode)
+    })
 
     setTimeout(() => {
       setIsAnimating(false)
-    }, 500)
+    }, 300) // Reduced from 500ms to 300ms
   }
 
   return (

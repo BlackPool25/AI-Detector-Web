@@ -249,23 +249,6 @@ export default function AwarenessPage() {
           </p>
         </motion.section>
 
-        {/* CTA */}
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true }}
-          variants={fadeInUp}
-          className="text-center space-y-4 sm:space-y-6 px-4"
-        >
-          <h3 className="text-xl sm:text-2xl font-bold">Test Your Ability to Spot AI</h3>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full sm:w-auto min-h-[48px] px-6 sm:px-8 py-3 sm:py-4 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all"
-          >
-            Take the Challenge →
-          </motion.button>
-        </motion.div>
       </div>
     </div>
   )

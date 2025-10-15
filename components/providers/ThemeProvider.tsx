@@ -26,7 +26,10 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Update the data-mode attribute on the root element
-    document.documentElement.setAttribute('data-mode', mode)
+    // Use requestAnimationFrame for smoother transitions
+    requestAnimationFrame(() => {
+      document.documentElement.setAttribute('data-mode', mode)
+    })
   }, [mode])
 
   useEffect(() => {
