@@ -62,43 +62,46 @@ export default function SignupPage() {
     }
 
     try {
-      // Create auth user
+      // Create auth user with username in metadata
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            username: username.trim(),
+          }
         }
       })
 
       if (error) throw error
 
       if (data.user) {
-        // Create user profile
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            id: data.user.id,
-            username: username.trim(),
-            bio: null,
-            avatar_url: null,
-          })
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-          // Check if it's a unique constraint violation
-          if (profileError.message?.includes('duplicate') || profileError.message?.includes('unique')) {
-            throw new Error('Username already taken. Please choose another.')
-          }
-          // Don't fail the signup if profile creation fails for other reasons
-          // User can create it later or we can handle it in the callback
-        }
-
-        setSuccess(true)
-        // If email confirmation is disabled, redirect to dashboard
+        // If email confirmation is disabled (immediate session), create profile now
         if (data.session) {
+          const { error: profileError } = await supabase
+            .from('user_profiles')
+            .insert({
+              id: data.user.id,
+              username: username.trim(),
+              bio: null,
+              avatar_url: null,
+            })
+
+          if (profileError) {
+            console.error('Profile creation error:', profileError)
+            // Check if it's a unique constraint violation
+            if (profileError.message?.includes('duplicate') || profileError.message?.includes('unique')) {
+              throw new Error('Username already taken. Please choose another.')
+            }
+          }
+          
           router.push('/dashboard')
           router.refresh()
+        } else {
+          // Email confirmation required - username stored in metadata
+          // Profile will be created after email confirmation in callback
+          setSuccess(true)
         }
       }
     } catch (err: any) {
