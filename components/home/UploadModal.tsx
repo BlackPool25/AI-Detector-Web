@@ -2,12 +2,17 @@
 
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, FileText, Image, Video, X, Loader2 } from 'lucide-react'
+import { Upload, FileText, Image, Video, X, Loader2, AlertCircle } from 'lucide-react'
 import { useMode } from '@/components/providers/ThemeProvider'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { getModeColors, DetectionMode } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import { useFileUpload } from '@/hooks/useFileUpload'
+import { validateFile } from '@/lib/fileValidation'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import type { DetectionResult } from '@/types/detection'
 
 interface UploadModalProps {
   isOpen: boolean
@@ -44,10 +49,11 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [result, setResult] = useState<{
-    confidence: number
-    isAI: boolean
-  } | null>(null)
+  const [result, setResult] = useState<DetectionResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const { uploadFile, uploading } = useFileUpload(mode)
+  const supabase = createClient()
+  const router = useRouter()
 
   const config = modeConfig[mode]
   const Icon = config.icon
@@ -65,41 +71,102 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
+    setError(null)
     
     const droppedFile = e.dataTransfer.files[0]
     if (droppedFile) {
+      // Validate file before setting
+      const validation = validateFile(droppedFile, mode)
+      if (!validation.valid) {
+        setError(validation.error || 'Invalid file')
+        return
+      }
       setFile(droppedFile)
     }
-  }, [])
+  }, [mode])
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
+      // Validate file before setting
+      const validation = validateFile(selectedFile, mode)
+      if (!validation.valid) {
+        setError(validation.error || 'Invalid file')
+        return
+      }
       setFile(selectedFile)
     }
-  }, [])
+  }, [mode])
 
   const handleUpload = async () => {
     if (!file) return
 
     setIsAnalyzing(true)
     setResult(null)
+    setError(null)
 
-    // Simulate analysis
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    try {
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setError('Please login to analyze files')
+        setIsAnalyzing(false)
+        // Redirect to login after a delay
+        setTimeout(() => {
+          router.push('/auth/login')
+          handleClose()
+        }, 2000)
+        return
+      }
 
-    // Mock result
-    const confidence = Math.floor(Math.random() * 30) + 70
-    const isAI = confidence > 50
+      // Upload file to Supabase Storage
+      const uploadedFile = await uploadFile(file)
 
-    setResult({ confidence, isAI })
-    setIsAnalyzing(false)
+      // Simulate AI detection (replace with actual API call in production)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      // Mock detection result
+      const confidence = Math.floor(Math.random() * 30) + 70
+      const isAI = confidence > 50
+      const detectionResult: DetectionResult = {
+        confidence,
+        isAI,
+        label: isAI ? 'AI-Generated Content Detected' : 'Authentic Human Content',
+        model: 'DetectX-v1'
+      }
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('detection_history')
+        .insert({
+          user_id: user.id,
+          filename: uploadedFile.fileName,
+          file_type: mode,
+          file_size: uploadedFile.fileSize,
+          file_extension: uploadedFile.fileExtension,
+          file_url: uploadedFile.url,
+          detection_result: JSON.stringify(detectionResult),
+          confidence_score: confidence,
+          model_used: 'DetectX-v1'
+        })
+
+      if (dbError) throw dbError
+
+      setResult(detectionResult)
+    } catch (err: any) {
+      console.error('Upload error:', err)
+      setError(err.message || 'Failed to analyze file. Please try again.')
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   const handleClose = () => {
     setFile(null)
     setResult(null)
     setIsAnalyzing(false)
+    setError(null)
     onClose()
   }
 
@@ -126,6 +193,18 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
           </h2>
           <p className="text-sm text-foreground/60">{config.description}</p>
         </div>
+
+        {/* Error message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg p-4 flex items-start gap-3"
+          >
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <p className="text-sm">{error}</p>
+          </motion.div>
+        )}
 
         {/* Upload area */}
         {!result && (
@@ -208,7 +287,10 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
                 {result.confidence}%
               </motion.div>
               <p className="text-lg font-semibold">
-                {result.isAI ? 'Likely AI-Generated' : 'Likely Authentic'}
+                {result.isAI ? 'AI-Generated' : 'Human Created'}
+              </p>
+              <p className="text-sm text-foreground/60 mt-1">
+                {result.label}
               </p>
             </div>
 

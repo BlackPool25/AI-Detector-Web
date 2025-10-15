@@ -4,11 +4,14 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Menu, X, Moon, Sun } from 'lucide-react'
+import { Menu, X, Moon, Sun, User, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useMode } from '@/components/providers/ThemeProvider'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -26,10 +29,28 @@ export function Navbar() {
   const { theme, setTheme } = useTheme()
   const { mode } = useMode()
   const [mounted, setMounted] = useState(false)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+
+    // Get initial user
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,6 +59,13 @@ export function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setShowUserMenu(false)
+    router.push('/')
+    router.refresh()
+  }
 
   if (!mounted) return null
 
@@ -126,13 +154,55 @@ export function Navbar() {
               )}
             </button>
 
-            {/* Auth buttons */}
-            <Button variant="ghost" size="default">
-              Login
-            </Button>
-            <Button variant="default" size="default" className="shadow-lg">
-              Sign Up
-            </Button>
+            {/* Auth buttons or user menu */}
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="default">
+                    Dashboard
+                  </Button>
+                </Link>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="text-sm font-medium max-w-[150px] truncate">
+                      {user.email}
+                    </span>
+                  </button>
+                  {showUserMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute right-0 mt-2 w-48 glass dark:glass-dark rounded-lg shadow-lg overflow-hidden"
+                    >
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-2 px-4 py-3 text-sm hover:bg-white/10 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="ghost" size="default">
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button variant="default" size="default" className="shadow-lg">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -188,12 +258,36 @@ export function Navbar() {
                 </span>
               </button>
               
-              <Button variant="ghost" className="w-full">
-                Login
-              </Button>
-              <Button variant="default" className="w-full">
-                Sign Up
-              </Button>
+              {/* Auth buttons or user info for mobile */}
+              {user ? (
+                <>
+                  <Link href="/dashboard" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" className="w-full">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <div className="px-4 py-3 text-sm text-foreground/60 truncate">
+                    {user.email}
+                  </div>
+                  <Button variant="default" className="w-full" onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/login" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
+                    <Button variant="default" className="w-full">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </motion.div>
