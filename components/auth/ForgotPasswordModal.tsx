@@ -25,18 +25,11 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
     setLoading(true)
 
     try {
-      console.log('Attempting password reset for:', email)
-      console.log('Redirect URL:', `${window.location.origin}/auth/reset-password`)
-      
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 
-      console.log('Reset password response:', { data, error })
-
       if (error) {
-        console.error('Supabase error:', error)
-        
         // Provide more helpful error messages
         if (error.message.includes('rate')) {
           throw new Error('Too many requests. Please wait a few minutes and try again.')
@@ -49,11 +42,9 @@ export function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProp
         }
       }
 
-      console.log('Password reset email sent successfully')
       setSuccess(true)
       setEmail('')
     } catch (err: any) {
-      console.error('Password reset error:', err)
       setError(err.message || 'Failed to send reset email. Please try again later.')
     } finally {
       setLoading(false)
