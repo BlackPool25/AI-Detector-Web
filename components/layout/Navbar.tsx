@@ -21,7 +21,6 @@ const navLinks = [
   { name: 'Research', href: '/research' },
   { name: 'How It Works', href: '/how-it-works' },
   { name: 'About', href: '/about' },
-  { name: 'Resources', href: '/resources' },
 ]
 
 export function Navbar() {

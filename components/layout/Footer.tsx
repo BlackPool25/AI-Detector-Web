@@ -18,7 +18,6 @@ const footerLinks = [
   { name: 'Contact', href: '/contact' },
   { name: 'Terms', href: '/terms' },
   { name: 'Privacy', href: '/privacy' },
-  { name: 'API Docs', href: '/api-docs' },
 ]
 
 export function Footer() {
