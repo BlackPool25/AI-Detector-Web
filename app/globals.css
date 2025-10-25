@@ -47,56 +47,56 @@
 
 /* Text Mode - Light */
 [data-mode="text"]:not(.dark) {
-  --background: 199 100% 97%;
+  --background: 210 40% 98%;
   --primary: 199 89% 48%;
   --primary-foreground: 210 40% 98%;
-  --accent: 199 95% 74%;
+  --accent: 199 80% 65%;
   --foreground: 222.2 84% 4.9%;
 }
 
 /* Text Mode - Dark */
 [data-mode="text"].dark {
   --background: 222 47% 11%;
-  --primary: 187 92% 42%;
+  --primary: 199 91% 54%;
   --primary-foreground: 222.2 47.4% 11.2%;
-  --accent: 186 94% 67%;
-  --foreground: 210 40% 98%;
+  --accent: 186 85% 60%;
+  --foreground: 215 25% 91%;
 }
 
 /* Image Mode - Light */
 [data-mode="image"]:not(.dark) {
-  --background: 300 100% 99%;
-  --primary: 330 81% 60%;
-  --primary-foreground: 210 40% 98%;
-  --accent: 330 85% 70%;
-  --foreground: 290 85% 20%;
+  --background: 300 60% 99%;
+  --primary: 322 70% 50%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 330 65% 60%;
+  --foreground: 280 85% 15%;
 }
 
 /* Image Mode - Dark */
 [data-mode="image"].dark {
-  --background: 260 24% 14%;
-  --primary: 292 76% 58%;
-  --primary-foreground: 0 0% 100%;
-  --accent: 291 78% 49%;
-  --foreground: 300 50% 99%;
+  --background: 270 20% 12%;
+  --primary: 292 60% 65%;
+  --primary-foreground: 280 15% 10%;
+  --accent: 282 60% 55%;
+  --foreground: 270 15% 95%;
 }
 
 /* Video Mode - Light */
 [data-mode="video"]:not(.dark) {
-  --background: 27 100% 97%;
-  --primary: 25 95% 53%;
-  --primary-foreground: 210 40% 98%;
-  --accent: 27 96% 61%;
-  --foreground: 20 90% 15%;
+  --background: 24 100% 97%;
+  --primary: 21 90% 48%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 27 85% 55%;
+  --foreground: 20 90% 12%;
 }
 
 /* Video Mode - Dark */
 [data-mode="video"].dark {
   --background: 12 10% 11%;
-  --primary: 0 84% 60%;
+  --primary: 24 90% 60%;
   --primary-foreground: 0 0% 100%;
-  --accent: 0 86% 70%;
-  --foreground: 0 86% 97%;
+  --accent: 27 85% 65%;
+  --foreground: 20 20% 93%;
 }
 
 @layer base {
@@ -152,6 +152,7 @@
 
   /* Optimize mode color transitions - use transform for better performance */
   :root {
+    --color-transition-speed: 0.3s;
     transition: 
       --background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
       --foreground 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -159,13 +160,21 @@
       --accent 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Optimize for low-end devices - simpler color transitions */
   @media (max-width: 768px) {
     :root {
+      --color-transition-speed: 0.2s;
       transition: 
         --background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         --foreground 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         --primary 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         --accent 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Reduce color complexity for better performance on mobile */
+    .card, .button, [class*="card"], [class*="button"] {
+      transition: background-color var(--color-transition-speed) ease,
+                  border-color var(--color-transition-speed) ease !important;
     }
   }
 }

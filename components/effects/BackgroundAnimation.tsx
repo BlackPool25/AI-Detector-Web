@@ -12,8 +12,15 @@ export function BackgroundAnimation() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', {
+      alpha: true,
+      desynchronized: true, // Improves performance on some devices
+    })
     if (!ctx) return
+
+    // Optimize canvas rendering
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'low' // Faster rendering on low-end devices
 
     // Set canvas size
     const resizeCanvas = () => {
@@ -49,9 +56,9 @@ export function BackgroundAnimation() {
 
       getColorForMode(mode: DetectionMode): string {
         const colors = {
-          text: '#38BDF8',
-          image: '#F472B6',
-          video: '#FB923C',
+          text: '#38bdf8',      // Optimized cyan
+          image: '#d946ef',     // Optimized magenta (less saturated)
+          video: '#fb923c',     // Optimized coral
         }
         return colors[mode]
       }
@@ -77,10 +84,17 @@ export function BackgroundAnimation() {
       }
     }
 
-    // Create particles based on mode
+    // Create particles based on mode - optimized for mobile
     let particles: Particle[] = []
+    const isMobile = window.innerWidth < 768
     const createParticles = (mode: DetectionMode) => {
-      const count = mode === 'text' ? 100 : mode === 'image' ? 80 : 60
+      // Reduce particle count on mobile, especially for image mode (blur is expensive)
+      let count: number
+      if (isMobile) {
+        count = mode === 'text' ? 50 : mode === 'image' ? 35 : 40
+      } else {
+        count = mode === 'text' ? 100 : mode === 'image' ? 60 : 60
+      }
       particles = []
       for (let i = 0; i < count; i++) {
         particles.push(new Particle(mode, canvas.width, canvas.height))
@@ -89,10 +103,22 @@ export function BackgroundAnimation() {
 
     createParticles(mode)
 
-    // Animation loop
+    // Animation loop with FPS throttling for mobile
     let animationFrameId: number
-    const animate = () => {
+    let lastFrameTime = 0
+    const targetFPS = isMobile ? 30 : 60 // Lower FPS on mobile for better performance
+    const frameInterval = 1000 / targetFPS
+    
+    const animate = (currentTime: number = 0) => {
       if (!ctx || !canvas) return
+      
+      // Throttle frame rate on mobile
+      const elapsed = currentTime - lastFrameTime
+      if (elapsed < frameInterval) {
+        animationFrameId = requestAnimationFrame(animate)
+        return
+      }
+      lastFrameTime = currentTime - (elapsed % frameInterval)
       
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -125,18 +151,32 @@ export function BackgroundAnimation() {
           })
         })
       } else if (mode === 'image') {
-        // Bokeh particles for image mode
+        // Bokeh particles for image mode - optimized for performance
         particles.forEach((particle) => {
           particle.update()
           
-          // Larger, blurred circles
+          // Simulate blur with layered circles (much faster than CSS blur filter)
           ctx.save()
-          ctx.globalAlpha = particle.opacity * 0.3
-          ctx.filter = 'blur(4px)'
+          
+          // Outer glow layer (largest, most transparent)
+          ctx.globalAlpha = particle.opacity * 0.08
           ctx.fillStyle = particle.color
           ctx.beginPath()
-          ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2)
+          ctx.arc(particle.x, particle.y, particle.size * 4, 0, Math.PI * 2)
           ctx.fill()
+          
+          // Middle layer
+          ctx.globalAlpha = particle.opacity * 0.15
+          ctx.beginPath()
+          ctx.arc(particle.x, particle.y, particle.size * 2.5, 0, Math.PI * 2)
+          ctx.fill()
+          
+          // Core layer (smallest, most opaque)
+          ctx.globalAlpha = particle.opacity * 0.25
+          ctx.beginPath()
+          ctx.arc(particle.x, particle.y, particle.size * 1.5, 0, Math.PI * 2)
+          ctx.fill()
+          
           ctx.restore()
         })
       } else {
