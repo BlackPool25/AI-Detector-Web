@@ -103,6 +103,8 @@
   * {
     @apply border-border;
     -webkit-tap-highlight-color: transparent;
+    /* Custom cursor - hotspot at 4,4 for tilted pointer orientation */
+    cursor: url('/cursors/custom-cursor-32.png') 4 4, auto;
   }
   body {
     @apply bg-background text-foreground;
@@ -141,6 +143,13 @@
   button, a, [role="button"] {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    /* Custom cursor for clickable elements - tilted hotspot */
+    cursor: url('/cursors/custom-cursor-32.png') 4 4, pointer;
+  }
+  
+  /* Custom cursor for text areas */
+  input, textarea, [contenteditable] {
+    cursor: url('/cursors/custom-cursor-32.png') 4 4, text;
   }
 
   /* Exclude PageLoader from mode transition effects */
