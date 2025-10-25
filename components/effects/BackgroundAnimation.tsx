@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react'
 import { useMode } from '@/components/providers/ThemeProvider'
 import { DetectionMode } from '@/lib/utils'
+import { FEATURE_FLAGS } from '@/lib/themeConfig'
 
 export function BackgroundAnimation() {
   const { mode, isDark } = useMode()
@@ -43,6 +44,9 @@ export function BackgroundAnimation() {
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY, isMoving: true }
       
+      // Only create ripples if feature is enabled
+      if (!FEATURE_FLAGS.enableRippleEffect) return
+      
       const now = Date.now()
       const timeSinceLastRipple = now - lastRippleTimeRef.current
       
@@ -76,6 +80,9 @@ export function BackgroundAnimation() {
       if (e.touches.length > 0) {
         const touch = e.touches[0]
         mouseRef.current = { x: touch.clientX, y: touch.clientY, isMoving: true }
+        
+        // Only create ripples if feature is enabled
+        if (!FEATURE_FLAGS.enableRippleEffect) return
         
         const now = Date.now()
         const timeSinceLastRipple = now - lastRippleTimeRef.current

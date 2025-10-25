@@ -1,5 +1,13 @@
 import { DetectionMode } from './utils'
 
+// ==========================================
+// FEATURE TOGGLES - Easy On/Off Switches
+// ==========================================
+export const FEATURE_FLAGS = {
+  // Set to true to enable ripple effect on mouse movement, false to disable
+  enableRippleEffect: false,
+}
+
 export interface ModeTheme {
   name: string
   icon: string
