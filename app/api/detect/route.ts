@@ -44,12 +44,12 @@ interface DetectionResult {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { video_url, image, threshold = 0.33 } = body
+    const { video_url, image, text, threshold = 0.33 } = body
 
-    // Support both video and image detection
-    if (!video_url && !image) {
+    // Support video, image, and text detection
+    if (!video_url && !image && !text) {
       return NextResponse.json(
-        { error: 'No video_url or image provided' },
+        { error: 'No video_url, image, or text provided' },
         { status: 400 }
       )
     }
@@ -170,6 +170,70 @@ export async function POST(request: NextRequest) {
           ? 'AI-Generated Content Detected'
           : 'Authentic Human Content',
         model: 'EfficientFormer-S2V1 (Modal)',
+      }
+
+      return NextResponse.json(detectionResult)
+    }
+
+    // Handle text detection (AI text detector)
+    if (text) {
+      console.log('[API] Processing text')
+      
+      const textApiUrl = process.env.MODAL_TEXT_API_URL
+      if (!textApiUrl) {
+        console.error('MODAL_TEXT_API_URL is not configured')
+        return NextResponse.json(
+          { error: 'Text detection service is not configured' },
+          { status: 500 }
+        )
+      }
+
+      const modalResponse = await fetch(textApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(process.env.MODAL_API_KEY && {
+            Authorization: `Bearer ${process.env.MODAL_API_KEY}`,
+          }),
+        },
+        body: JSON.stringify({
+          text,
+          format: 'web',
+          include_breakdown: true,
+          enable_provenance: false,
+        }),
+      })
+
+      if (!modalResponse.ok) {
+        const errorText = await modalResponse.text().catch(() => 'Unknown error')
+        console.error('Modal API error:', modalResponse.status, errorText)
+        return NextResponse.json(
+          { error: 'Failed to process text with AI model' },
+          { status: 500 }
+        )
+      }
+
+      const modalData: any = await modalResponse.json()
+
+      if (!modalData.success) {
+        console.error('Modal API returned error')
+        return NextResponse.json(
+          { error: 'Text detection failed' },
+          { status: 500 }
+        )
+      }
+
+      const result = modalData.result
+      const isAI = result.is_ai
+      const confidencePercent = Math.round(result.confidence * 100)
+
+      const detectionResult: DetectionResult = {
+        confidence: confidencePercent,
+        isAI,
+        label: isAI
+          ? 'AI-Generated Text Detected'
+          : 'Authentic Human Text',
+        model: 'Ensemble-AI-Detector-v3 (Modal)',
       }
 
       return NextResponse.json(detectionResult)

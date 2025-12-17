@@ -173,19 +173,27 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
         detectionResult = await detectResponse.json()
         modelUsed = detectionResult.model
-      } else {
-        // Mock detection for text (until model is connected)
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+      } else if (mode === 'text') {
+        // Real text detection using ensemble AI detector
+        // For text mode, the file content is the text itself
+        const textContent = await file.text()
 
-        const confidence = Math.floor(Math.random() * 30) + 70
-        const isAI = confidence > 50
-        detectionResult = {
-          confidence,
-          isAI,
-          label: isAI ? 'AI-Generated Content Detected' : 'Authentic Human Content',
-          model: 'DetectX-v1'
+        const detectResponse = await fetch('/api/detect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: textContent }),
+        })
+
+        if (!detectResponse.ok) {
+          const errorData = await detectResponse.json().catch(() => ({ error: 'Detection failed' }))
+          throw new Error(errorData.error || 'Failed to analyze text')
         }
-        modelUsed = 'DetectX-v1'
+
+        detectionResult = await detectResponse.json()
+        modelUsed = detectionResult.model
+      } else {
+        // Fallback for unknown modes
+        throw new Error('Unsupported detection mode')
       }
 
       // Save to database
