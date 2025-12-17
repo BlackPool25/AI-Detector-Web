@@ -99,6 +99,19 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
     }
   }, [mode])
 
+  // Helper function to convert File to base64 string
+  const fileToBase64 = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1]
+        resolve(base64)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
   const handleUpload = async () => {
     if (!file) return
 
@@ -123,17 +136,56 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
       // Upload file to Supabase Storage
       const uploadedFile = await uploadFile(file)
 
-      // Simulate AI detection (replace with actual API call in production)
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      let detectionResult: DetectionResult
+      let modelUsed: string
 
-      // Mock detection result
-      const confidence = Math.floor(Math.random() * 30) + 70
-      const isAI = confidence > 50
-      const detectionResult: DetectionResult = {
-        confidence,
-        isAI,
-        label: isAI ? 'AI-Generated Content Detected' : 'Authentic Human Content',
-        model: 'DetectX-v1'
+      // Branch on mode: use real AI models
+      if (mode === 'image') {
+        // Convert file to base64 for Modal API
+        const base64Image = await fileToBase64(file)
+
+        // Call our backend API that connects to Modal
+        const detectResponse = await fetch('/api/detect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64Image }),
+        })
+
+        if (!detectResponse.ok) {
+          const errorData = await detectResponse.json().catch(() => ({ error: 'Detection failed' }))
+          throw new Error(errorData.error || 'Failed to analyze image')
+        }
+
+        detectionResult = await detectResponse.json()
+        modelUsed = detectionResult.model
+      } else if (mode === 'video') {
+        // Real video detection using balanced 3-layer pipeline
+        const detectResponse = await fetch('/api/detect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ video_url: uploadedFile.url }),
+        })
+
+        if (!detectResponse.ok) {
+          const errorData = await detectResponse.json().catch(() => ({ error: 'Detection failed' }))
+          throw new Error(errorData.error || 'Failed to analyze video')
+        }
+
+        detectionResult = await detectResponse.json()
+        modelUsed = detectionResult.model
+      } else {
+        // Mock detection for text (until model is connected)
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        const confidence = Math.floor(Math.random() * 30) + 70
+        const isAI = confidence > 50
+        detectionResult = {
+          confidence,
+          isAI,
+          label: isAI ? 'AI-Generated Content Detected' : 'Authentic Human Content',
+          model: 'DetectX-v1'
+        }
+        modelUsed = 'DetectX-v1'
       }
 
       // Save to database
@@ -147,8 +199,8 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
           file_extension: uploadedFile.fileExtension,
           file_url: uploadedFile.url,
           detection_result: JSON.stringify(detectionResult),
-          confidence_score: confidence,
-          model_used: 'DetectX-v1'
+          confidence_score: detectionResult.confidence,
+          model_used: modelUsed
         })
 
       if (dbError) throw dbError
@@ -292,6 +344,62 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
               <p className="text-sm text-foreground/60 mt-1">
                 {result.label}
               </p>
+              
+              {/* Video-specific metadata */}
+              {(result.total_time || result.processing_time || result.stopped_at) && (
+                <div className="mt-4 pt-4 border-t border-foreground/10 space-y-2 text-xs text-foreground/70">
+                  {result.stopped_at && (
+                    <div className="flex justify-between">
+                      <span>Analysis:</span>
+                      <span className="font-medium">{result.stopped_at}</span>
+                    </div>
+                  )}
+                  {(result.total_time || result.processing_time) && (
+                    <div className="flex justify-between">
+                      <span>Processing Time:</span>
+                      <span className="font-medium">{(result.total_time || result.processing_time)?.toFixed(2)}s</span>
+                    </div>
+                  )}
+                  {result.model && (
+                    <div className="flex justify-between">
+                      <span>Model:</span>
+                      <span className="font-medium text-xs">{result.model}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Layer Breakdown for Video */}
+              {result.layers && result.layers.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-foreground/10">
+                  <p className="text-xs font-semibold text-foreground/80 mb-3">Detection Layers:</p>
+                  <div className="space-y-2">
+                    {result.layers.map((layer, idx) => {
+                      const isLayerFake = layer.verdict === 'FAKE'
+                      return (
+                        <div key={idx} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              'w-2 h-2 rounded-full',
+                              isLayerFake ? 'bg-red-500' : 'bg-green-500'
+                            )} />
+                            <span className="font-medium">{layer.name.replace('Layer 1: ', '').replace('Layer 2: ', '').replace('Layer 3: ', '')}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={cn(
+                              'font-semibold',
+                              isLayerFake ? 'text-red-500' : 'text-green-500'
+                            )}>
+                              {layer.confidence}%
+                            </span>
+                            <span className="text-foreground/50 text-[10px]">{layer.time.toFixed(1)}s</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

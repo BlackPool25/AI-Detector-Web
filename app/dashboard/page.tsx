@@ -3,17 +3,19 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import type { DetectionHistory } from '@/types/detection'
+import type { DetectionHistory, DetectionResult } from '@/types/detection'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { formatFileSize } from '@/lib/fileValidation'
-import { FileText, Image as ImageIcon, Video, Download, Calendar, Gauge } from 'lucide-react'
+import { FileText, Image as ImageIcon, Video, Download, Calendar, Gauge, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { DetectorBreakdown } from '@/components/ui/DetectorBreakdown'
 
 export default function DashboardPage() {
   const [history, setHistory] = useState<DetectionHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [expandedItem, setExpandedItem] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -77,8 +79,10 @@ export default function DashboardPage() {
     return 'text-red-600 dark:text-red-400'
   }
 
-  const getResultBadge = (result: any) => {
-    const isAI = result.isAI
+  const getResultBadge = (result: string | DetectionResult) => {
+    // Handle both string and object types
+    const resultObj = typeof result === 'string' ? JSON.parse(result) : result
+    const isAI = resultObj.isAI
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
         isAI 
@@ -151,7 +155,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs md:text-sm text-foreground/60 mb-1">AI Detected</p>
                 <p className="text-2xl md:text-3xl font-bold text-red-600 dark:text-red-400">
-                  {history.filter(h => h.detection_result.isAI).length}
+                  {history.filter(h => typeof h.detection_result === 'object' && h.detection_result.isAI).length}
                 </p>
               </div>
               <FileText className="w-8 h-8 md:w-12 md:h-12 text-red-500 opacity-20" />
@@ -162,7 +166,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs md:text-sm text-foreground/60 mb-1">Human Created</p>
                 <p className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-400">
-                  {history.filter(h => !h.detection_result.isAI).length}
+                  {history.filter(h => typeof h.detection_result === 'object' && !h.detection_result.isAI).length}
                 </p>
               </div>
               <FileText className="w-8 h-8 md:w-12 md:h-12 text-green-500 opacity-20" />
@@ -255,10 +259,47 @@ export default function DashboardPage() {
 
                   {/* Model Info */}
                   <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-foreground/10">
-                    <p className="text-xs text-foreground/50">
-                      Analyzed by {item.model_used} • {item.detection_result.label}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-foreground/50">
+                        Analyzed by {item.model_used} • {typeof item.detection_result === 'object' ? item.detection_result.label : 'Unknown'}
+                      </p>
+                      
+                      {/* Show expand button only for videos with multimodal scores */}
+                      {item.file_type === 'video' && item.detector_scores && Object.keys(item.detector_scores).length > 0 && (
+                        <button
+                          onClick={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
+                          className="text-xs text-primary hover:underline flex items-center gap-1 min-h-[44px] md:min-h-0"
+                        >
+                          {expandedItem === item.id ? (
+                            <>
+                              <ChevronUp className="w-4 h-4" />
+                              Hide Details
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-4 h-4" />
+                              View Detailed Analysis
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Multimodal Breakdown (expanded) */}
+                  {expandedItem === item.id && item.detector_scores && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <DetectorBreakdown 
+                        scores={item.detector_scores}
+                        hasAudio={item.model_metadata?.models_used?.includes('Wav2Vec2') || false}
+                      />
+                    </motion.div>
+                  )}
                 </Card>
               </motion.div>
             ))}

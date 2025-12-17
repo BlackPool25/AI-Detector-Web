@@ -12,6 +12,11 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # Cron Job Secret (generate a random string)
 CRON_SECRET=your-random-secret-string
+
+# Modal AI Model API
+# Get this from your Modal deployment: https://modal.com/apps
+MODAL_API_URL=https://blackpool25--ai-vs-real-detector-fastapi-app.modal.run
+# MODAL_API_KEY=your-modal-api-key (optional, for secured endpoints)
 ```
 
 ## How to Get Supabase Credentials
@@ -24,9 +29,17 @@ CRON_SECRET=your-random-secret-string
    - anon/public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - service_role key → `SUPABASE_SERVICE_ROLE_KEY` (keep this secret!)
 
+## How to Get Modal Credentials
+
+1. Deploy your model to Modal: https://modal.com
+2. After deployment, copy the endpoint URL from the deployment output
+3. The URL format is: `https://your-username--app-name-fastapi-app.modal.run`
+4. (Optional) Create an API key in Modal dashboard for secured endpoints
+
 ## Security Notes
 
 - Never commit `.env.local` to git (it's already in `.gitignore`)
 - Keep `SUPABASE_SERVICE_ROLE_KEY` secret - it bypasses Row Level Security
 - Only use `service_role` key in server-side code
+- Keep `MODAL_API_KEY` private if using secured endpoints
 
