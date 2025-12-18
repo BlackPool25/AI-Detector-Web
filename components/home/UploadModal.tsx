@@ -264,21 +264,27 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
       }
 
       // Save to database
+      // Map detection result to simple string for database
+      const detectionResultString = detectionResult.isAI ? 'FAKE' : 'REAL'
+      
       const { error: dbError } = await supabase
         .from('detection_history')
         .insert({
           user_id: user.id,
           filename: uploadedFile?.fileName || file.name,
-          file_type: mode,
+          file_type: mode, // 'text', 'image', or 'video' - all valid
           file_size: uploadedFile?.fileSize || file.size,
           file_extension: uploadedFile?.fileExtension || '.' + file.name.split('.').pop()!,
           file_url: uploadedFile?.url || null,
-          detection_result: JSON.stringify(detectionResult),
-          confidence_score: detectionResult.confidence,
-          model_used: modelUsed
+          detection_result: detectionResultString, // Must be simple string, not JSON
+          confidence_score: detectionResult.confidence || 0,
+          model_used: modelUsed || 'Unknown'
         })
 
-      if (dbError) throw dbError
+      if (dbError) {
+        console.error('Database error:', dbError)
+        throw new Error(`Database error: ${dbError.message}`)
+      }
 
       setResult(detectionResult)
     } catch (err: any) {
