@@ -133,9 +133,6 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
         return
       }
 
-      // Upload file to Supabase Storage
-      const uploadedFile = await uploadFile(file)
-
       let detectionResult: DetectionResult
       let modelUsed: string
       let uploadedFile: any = null
