@@ -203,8 +203,37 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
         modelUsed = detectionResult.model
       } else if (mode === 'text') {
         // Real text detection using ensemble AI detector
-        // For text mode, the file content is the text itself
-        const textContent = await file.text()
+        // For text mode, handle both plain text and documents (PDF, DOCX, etc.)
+        let textContent: string
+        
+        // Check if it's a document that needs extraction
+        const fileExtension = file.name.toLowerCase().split('.').pop()
+        const isDocument = ['pdf', 'doc', 'docx'].includes(fileExtension || '')
+        
+        if (isDocument) {
+          console.log('[Upload] Document detected, extracting text...')
+          // For documents, send the file to backend for extraction
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('extract_text', 'true')
+          
+          const extractResponse = await fetch('/api/extract-text', {
+            method: 'POST',
+            body: formData,
+          })
+          
+          if (!extractResponse.ok) {
+            const errorData = await extractResponse.json().catch(() => ({ error: 'Text extraction failed' }))
+            throw new Error(errorData.error || 'Failed to extract text from document')
+          }
+          
+          const extractData = await extractResponse.json()
+          textContent = extractData.text
+          console.log('[Upload] Text extracted:', textContent.length, 'characters')
+        } else {
+          // Plain text file
+          textContent = await file.text()
+        }
 
         const detectResponse = await fetch('/api/detect', {
           method: 'POST',
@@ -226,7 +255,8 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
           fileSize: file.size,
           fileExtension: '.' + file.name.split('.').pop()!,
           url: null,
-          path: null
+          path: null,
+          extractedText: textContent.substring(0, 200) + (textContent.length > 200 ? '...' : '') // Store preview
         }
       } else {
         // Fallback for unknown modes
