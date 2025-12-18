@@ -3,6 +3,7 @@ export interface DetectionResult {
   isAI: boolean
   label: string
   model: string
+  // Video-specific fields
   layers?: Array<{
     name: string
     verdict: string
@@ -12,6 +13,21 @@ export interface DetectionResult {
   stopped_at?: string
   total_time?: number
   processing_time?: number
+  // Image-specific fields
+  predictions?: Array<{
+    label: string
+    score: number
+  }>
+  top_prediction?: string
+  // Text-specific fields
+  prediction?: string
+  agreement?: string
+  ensemble_score?: number
+  breakdown?: {
+    detective?: any
+    binoculars?: any
+    fast_detect?: any
+  }
 }
 
 export interface DetectorScores {

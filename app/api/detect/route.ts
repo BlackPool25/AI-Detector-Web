@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { DetectionResult } from '@/types/detection'
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
@@ -22,23 +23,6 @@ interface ModalVideoResponse {
   // Error fields
   error?: string
   error_type?: string
-}
-
-// Our app's detection result type
-interface DetectionResult {
-  confidence: number  // 0-100 scale
-  isAI: boolean
-  label: string
-  model: string
-  processing_time?: number
-  layers?: Array<{
-    name: string
-    verdict: string
-    confidence: number
-    time: number
-  }>
-  stopped_at?: string
-  total_time?: number
 }
 
 export async function POST(request: NextRequest) {
@@ -182,6 +166,9 @@ export async function POST(request: NextRequest) {
           ? 'AI-Generated Content Detected'
           : 'Authentic Human Content',
         model: 'EfficientFormer-S2V1 (Modal)',
+        // Pass through additional fields
+        predictions: modalData.predictions,
+        top_prediction: modalData.top_prediction,
       }
 
       console.log('[API] Image result:', detectionResult)
@@ -258,6 +245,11 @@ export async function POST(request: NextRequest) {
           ? 'AI-Generated Text Detected'
           : 'Authentic Human Text',
         model: 'Ensemble-AI-Detector-v3 (Modal)',
+        // Pass through additional fields
+        prediction: result.prediction,
+        agreement: result.agreement,
+        ensemble_score: result.ensemble_score,
+        breakdown: modalData.breakdown,
       }
 
       console.log('[API] Text result:', detectionResult)

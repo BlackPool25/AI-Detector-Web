@@ -138,11 +138,14 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
       let detectionResult: DetectionResult
       let modelUsed: string
+      let uploadedFile: any = null
 
       // Branch on mode: use real AI models
       if (mode === 'image') {
+        console.log('[Upload] Processing image detection...')
         // Convert file to base64 for Modal API
         const base64Image = await fileToBase64(file)
+        console.log('[Upload] Converted to base64, length:', base64Image.length)
 
         // Call our backend API that connects to Modal
         const detectResponse = await fetch('/api/detect', {
@@ -151,14 +154,42 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
           body: JSON.stringify({ image: base64Image }),
         })
 
+        console.log('[Upload] Detection response status:', detectResponse.status)
+
         if (!detectResponse.ok) {
-          const errorData = await detectResponse.json().catch(() => ({ error: 'Detection failed' }))
+          const errorText = await detectResponse.text()
+          console.error('[Upload] Detection failed:', errorText)
+          let errorData
+          try {
+            errorData = JSON.parse(errorText)
+          } catch {
+            errorData = { error: errorText }
+          }
           throw new Error(errorData.error || 'Failed to analyze image')
         }
 
         detectionResult = await detectResponse.json()
+        console.log('[Upload] Detection result:', detectionResult)
         modelUsed = detectionResult.model
+        
+        // For images, upload to storage after detection (optional, for history)
+        try {
+          uploadedFile = await uploadFile(file)
+        } catch (uploadError) {
+          console.warn('[Upload] Storage upload failed, continuing without storage:', uploadError)
+          // Create a minimal uploadedFile object
+          uploadedFile = {
+            fileName: file.name,
+            fileSize: file.size,
+            fileExtension: '.' + file.name.split('.').pop()!,
+            url: null,
+            path: null
+          }
+        }
       } else if (mode === 'video') {
+        // Upload video first
+        uploadedFile = await uploadFile(file)
+        
         // Real video detection using balanced 3-layer pipeline
         const detectResponse = await fetch('/api/detect', {
           method: 'POST',
@@ -191,6 +222,15 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
         detectionResult = await detectResponse.json()
         modelUsed = detectionResult.model
+        
+        // For text, create a minimal uploadedFile object
+        uploadedFile = {
+          fileName: file.name,
+          fileSize: file.size,
+          fileExtension: '.' + file.name.split('.').pop()!,
+          url: null,
+          path: null
+        }
       } else {
         // Fallback for unknown modes
         throw new Error('Unsupported detection mode')
@@ -201,11 +241,11 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
         .from('detection_history')
         .insert({
           user_id: user.id,
-          filename: uploadedFile.fileName,
+          filename: uploadedFile?.fileName || file.name,
           file_type: mode,
-          file_size: uploadedFile.fileSize,
-          file_extension: uploadedFile.fileExtension,
-          file_url: uploadedFile.url,
+          file_size: uploadedFile?.fileSize || file.size,
+          file_extension: uploadedFile?.fileExtension || '.' + file.name.split('.').pop()!,
+          file_url: uploadedFile?.url || null,
           detection_result: JSON.stringify(detectionResult),
           confidence_score: detectionResult.confidence,
           model_used: modelUsed
@@ -372,6 +412,86 @@ export function UploadModal({ isOpen, onClose }: UploadModalProps) {
                     <div className="flex justify-between">
                       <span>Model:</span>
                       <span className="font-medium text-xs">{result.model}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Image-specific predictions */}
+              {result.predictions && result.predictions.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-foreground/10">
+                  <p className="text-xs font-semibold text-foreground/80 mb-3">Model Predictions:</p>
+                  <div className="space-y-2">
+                    {result.predictions.map((pred, idx) => {
+                      const isTop = pred.label === result.top_prediction
+                      const isAI = pred.label.toUpperCase().includes('AI')
+                      return (
+                        <div key={idx} className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              'w-2 h-2 rounded-full',
+                              isAI ? 'bg-orange-500' : 'bg-blue-500',
+                              isTop && 'ring-2 ring-offset-1 ring-primary'
+                            )} />
+                            <span className={cn(
+                              'font-medium',
+                              isTop && 'text-foreground'
+                            )}>
+                              {pred.label}
+                              {isTop && ' ✓'}
+                            </span>
+                          </div>
+                          <span className={cn(
+                            'font-semibold',
+                            isTop ? 'text-foreground' : 'text-foreground/60'
+                          )}>
+                            {(pred.score * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {/* Text-specific breakdown */}
+              {result.agreement && (
+                <div className="mt-4 pt-4 border-t border-foreground/10">
+                  <p className="text-xs font-semibold text-foreground/80 mb-3">Detection Details:</p>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-foreground/70">Model Agreement:</span>
+                      <span className="font-medium">{result.agreement}</span>
+                    </div>
+                    {result.ensemble_score !== undefined && (
+                      <div className="flex justify-between">
+                        <span className="text-foreground/70">Ensemble Score:</span>
+                        <span className="font-medium">{result.ensemble_score.toFixed(4)}</span>
+                      </div>
+                    )}
+                    {result.prediction && (
+                      <div className="flex justify-between">
+                        <span className="text-foreground/70">Prediction:</span>
+                        <span className="font-medium">{result.prediction}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Show individual model scores if available */}
+                  {result.breakdown && (
+                    <div className="mt-3 pt-3 border-t border-foreground/10">
+                      <p className="text-xs font-semibold text-foreground/80 mb-2">Model Breakdown:</p>
+                      <div className="space-y-1.5">
+                        {Object.entries(result.breakdown).map(([model, data]: [string, any]) => (
+                          <div key={model} className="flex items-center justify-between text-[10px]">
+                            <span className="text-foreground/60 capitalize">{model}:</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{data.prediction}</span>
+                              <span className="text-foreground/50">({(data.confidence * 100).toFixed(0)}%)</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
