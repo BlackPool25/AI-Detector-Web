@@ -134,7 +134,17 @@ export async function POST(request: NextRequest) {
     if (image) {
       console.log('[API] Processing image (legacy)')
       
-      const modalResponse = await fetch(`${modalApiUrl}/predict`, {
+      const imageApiUrl = process.env.MODAL_IMAGE_API_URL
+      if (!imageApiUrl) {
+        console.error('MODAL_IMAGE_API_URL is not configured')
+        return NextResponse.json(
+          { error: 'Image detection service is not configured' },
+          { status: 500 }
+        )
+      }
+      
+      // Use /predict endpoint
+      const modalResponse = await fetch(`${imageApiUrl}/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,10 +168,12 @@ export async function POST(request: NextRequest) {
       }
 
       const modalData: any = await modalResponse.json()
+      
+      console.log('[API] Image response from Modal:', modalData)
 
-      const topPrediction = modalData.top_prediction?.toUpperCase() || ''
-      const isAI = topPrediction.includes('AI') || topPrediction.includes('FAKE')
-      const confidencePercent = Math.round((modalData.confidence || 0.5) * 100)
+      const topPrediction = modalData.top_prediction?.toUpperCase() || modalData.label?.toUpperCase() || ''
+      const isAI = topPrediction.includes('AI') || topPrediction.includes('FAKE') || topPrediction.includes('GENERATED')
+      const confidencePercent = Math.round((modalData.confidence || modalData.score || 0.5) * 100)
 
       const detectionResult: DetectionResult = {
         confidence: confidencePercent,
@@ -172,12 +184,22 @@ export async function POST(request: NextRequest) {
         model: 'EfficientFormer-S2V1 (Modal)',
       }
 
+      console.log('[API] Image result:', detectionResult)
+
       return NextResponse.json(detectionResult)
     }
 
     // Handle text detection (AI text detector)
     if (text) {
       console.log('[API] Processing text')
+      
+      // Validate minimum text length
+      if (text.trim().length < 20) {
+        return NextResponse.json(
+          { error: 'Text too short. Minimum 20 characters required.' },
+          { status: 400 }
+        )
+      }
       
       const textApiUrl = process.env.MODAL_TEXT_API_URL
       if (!textApiUrl) {
@@ -214,6 +236,8 @@ export async function POST(request: NextRequest) {
       }
 
       const modalData: any = await modalResponse.json()
+      
+      console.log('[API] Text response from Modal:', modalData)
 
       if (!modalData.success) {
         console.error('Modal API returned error')
@@ -224,8 +248,8 @@ export async function POST(request: NextRequest) {
       }
 
       const result = modalData.result
-      const isAI = result.is_ai
-      const confidencePercent = Math.round(result.confidence * 100)
+      const isAI = result.is_ai || false
+      const confidencePercent = Math.round((result.confidence || 0.5) * 100)
 
       const detectionResult: DetectionResult = {
         confidence: confidencePercent,
@@ -235,6 +259,8 @@ export async function POST(request: NextRequest) {
           : 'Authentic Human Text',
         model: 'Ensemble-AI-Detector-v3 (Modal)',
       }
+
+      console.log('[API] Text result:', detectionResult)
 
       return NextResponse.json(detectionResult)
     }
