@@ -40,13 +40,43 @@ export default function DashboardPage() {
           throw historyError
         }
 
-        // Parse detection results
-        const parsedHistory = (data || []).map((item: any) => ({
-          ...item,
-          detection_result: typeof item.detection_result === 'string' 
-            ? JSON.parse(item.detection_result) 
-            : item.detection_result
-        })) as DetectionHistory[]
+        // Parse detection results - handle both JSON objects and simple strings ("FAKE"/"REAL")
+        const parsedHistory = (data || []).map((item: any) => {
+          let parsedResult = item.detection_result
+
+          if (typeof item.detection_result === 'string') {
+            // Check if it's a simple "FAKE" or "REAL" string (not JSON)
+            const upperResult = item.detection_result.toUpperCase().trim()
+            if (upperResult === 'FAKE' || upperResult === 'REAL') {
+              // Convert simple string to DetectionResult-like object
+              parsedResult = {
+                isAI: upperResult === 'FAKE',
+                confidence: item.confidence_score || 0,
+                label: upperResult === 'FAKE' ? 'AI-Generated Content' : 'Human-Created Content',
+                model: item.model_used || 'Unknown'
+              }
+            } else {
+              // Try to parse as JSON
+              try {
+                parsedResult = JSON.parse(item.detection_result)
+              } catch (e) {
+                // If JSON parse fails, create a fallback object
+                console.warn('Failed to parse detection_result:', item.detection_result)
+                parsedResult = {
+                  isAI: false,
+                  confidence: item.confidence_score || 0,
+                  label: 'Unknown',
+                  model: item.model_used || 'Unknown'
+                }
+              }
+            }
+          }
+
+          return {
+            ...item,
+            detection_result: parsedResult
+          }
+        }) as DetectionHistory[]
 
         setHistory(parsedHistory)
       } catch (err: any) {
@@ -80,15 +110,32 @@ export default function DashboardPage() {
   }
 
   const getResultBadge = (result: string | DetectionResult) => {
-    // Handle both string and object types
-    const resultObj = typeof result === 'string' ? JSON.parse(result) : result
-    const isAI = resultObj.isAI
+    // Handle both string and object types safely
+    let isAI = false
+
+    if (typeof result === 'string') {
+      // Check if it's a simple "FAKE" or "REAL" string
+      const upperResult = result.toUpperCase().trim()
+      if (upperResult === 'FAKE' || upperResult === 'REAL') {
+        isAI = upperResult === 'FAKE'
+      } else {
+        // Try to parse as JSON
+        try {
+          const parsed = JSON.parse(result)
+          isAI = parsed.isAI
+        } catch {
+          isAI = false
+        }
+      }
+    } else {
+      isAI = result.isAI
+    }
+
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-        isAI 
-          ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' 
-          : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
-      }`}>
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isAI
+        ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+        : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
+        }`}>
         {isAI ? 'AI Generated' : 'Human Created'}
       </span>
     )
@@ -239,9 +286,9 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       {item.is_file_available && item.file_url && (
-                        <a 
-                          href={item.file_url} 
-                          target="_blank" 
+                        <a
+                          href={item.file_url}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs md:text-sm text-primary hover:underline flex items-center gap-1 min-h-[44px] md:min-h-0"
                         >
@@ -263,7 +310,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-foreground/50">
                         Analyzed by {item.model_used} • {typeof item.detection_result === 'object' ? item.detection_result.label : 'Unknown'}
                       </p>
-                      
+
                       {/* Show expand button only for videos with multimodal scores */}
                       {item.file_type === 'video' && item.detector_scores && Object.keys(item.detector_scores).length > 0 && (
                         <button
@@ -294,7 +341,7 @@ export default function DashboardPage() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <DetectorBreakdown 
+                      <DetectorBreakdown
                         scores={item.detector_scores}
                         hasAudio={item.model_metadata?.models_used?.includes('Wav2Vec2') || false}
                       />

@@ -1,0 +1,16 @@
+{
+    "name": "DetectX - AI Content Detection",
+    "short_name": "DetectX",
+    "description": "Detect AI-generated content in text, images, and videos",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#6366f1",
+    "icons": [
+        {
+            "src": "/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}
